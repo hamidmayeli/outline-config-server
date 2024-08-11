@@ -19,7 +19,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
 
     env:
       DOCKER_BUILDKIT: 1

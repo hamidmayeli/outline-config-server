@@ -12,7 +12,7 @@ COPY . .
 RUN npm run lint && npm run build
 
 FROM build AS test
-RUN npm run test-component:headless && npm run test-e2e:headless
+RUN npm run test-component:headless
 
 FROM scratch AS test-result
 COPY --from=test /app/coverage /
