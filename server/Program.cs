@@ -9,4 +9,6 @@ var app = builder.Build();
 
 app.AddToDos();
 
+app.UseStaticFiles();
+
 app.Run();

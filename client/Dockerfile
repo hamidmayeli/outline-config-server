@@ -1,0 +1,26 @@
+FROM node:20.10.0-slim AS build
+
+RUN apt-get update && apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb jq -y
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm ci
+
+COPY . .
+RUN npm run lint && npm run build
+
+FROM build AS test
+RUN npm run test-component:headless
+
+FROM scratch AS test-result
+COPY --from=test /app/coverage /
+
+FROM scratch AS deployable
+COPY --from=build /app/dist /
+
+FROM nginx:1.25-alpine-slim AS deployment
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+CMD ["/bin/sh", "-c", "nginx -g 'daemon off;'"]
+COPY --from=build /app/dist /usr/share/nginx/html
