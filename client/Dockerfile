@@ -4,8 +4,7 @@ RUN apt-get update && apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotif
 
 WORKDIR /app
 
-COPY package.json ./
-COPY package-lock.json ./
+COPY package*.json ./
 
 RUN npm ci
 
