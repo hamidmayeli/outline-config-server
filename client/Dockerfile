@@ -18,7 +18,7 @@ FROM scratch AS test-result
 COPY --from=test /app/coverage /
 
 FROM scratch AS deployable
-COPY --from=build /app/public /
+COPY --from=build /app/dist /
 
 FROM nginx:1.25-alpine-slim AS deployment
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
