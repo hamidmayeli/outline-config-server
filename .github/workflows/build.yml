@@ -1,0 +1,23 @@
+name: Build All
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    env:
+      DOCKER_BUILDKIT: 1
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Build Client
+      run: docker build -f ./client/Dockerfile -o ./server/wwwroot --target deployable ./client
+
+    - name: Build Server
+      run: docker build -f ./server/Dockerfile -t outline-manager ./server
