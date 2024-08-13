@@ -45,14 +45,12 @@
 
         try
         {
-            var server = JsonSerializer.Deserialize<Server>(newServerDetails, new JsonSerializerOptions()
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            }) ?? throw new Exception("Deserialize results in null.");
+            var server = newServerDetails.FromJson<Server>()
+                ?? throw new Exception("Deserialize results in null.");
 
             await _serverCollection.Add(server);
 
-            _navigationManager.NavigateTo("/");
+            _navigationManager.NavigateTo($"/server/{server.Id}");
         }
         catch (Exception exception)
         {

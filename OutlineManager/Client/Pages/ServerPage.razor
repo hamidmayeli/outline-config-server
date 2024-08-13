@@ -2,16 +2,23 @@
 
 @inject IServerCollection _severCollection;
 
-<h2>@(server?.Name ?? "Not Found")</h2>
+<h2>@(_server?.Name ?? "Not Found")</h2>
 
 @code{
     [Parameter]
     public int Id { get; set; }
 
-    Server? server;
+    private Server? _server;
+    private IEnumerable<string> _keys = [];
 
     protected override async Task OnInitializedAsync()
     {
-        server = await _severCollection.Get(Id);
+        _server = await _severCollection.Get(Id);
+        await LoadKeys();
+    }
+
+    private async Task LoadKeys()
+    {
+        var keys = await _server!.LoadKeys();
     }
 }

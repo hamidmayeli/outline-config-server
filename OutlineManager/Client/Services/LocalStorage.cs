@@ -1,5 +1,4 @@
 ﻿using Microsoft.JSInterop;
-using System.Text.Json;
 
 namespace Client.Services;
 
@@ -16,7 +15,7 @@ public class LocalStorage(
     ) : ILocalStorage
 {
     public ValueTask Set<T>(string key, T value)
-        => _jsRuntime.InvokeVoidAsync("localStorage.setItem", key, JsonSerializer.Serialize(value));
+        => _jsRuntime.InvokeVoidAsync("localStorage.setItem", key, value?.ToJson());
 
     public async ValueTask<T?> Get<T>(string key)
     {
@@ -24,7 +23,7 @@ public class LocalStorage(
 
         if(string.IsNullOrWhiteSpace(json)) return default;
 
-        return JsonSerializer.Deserialize<T>(json);
+        return json.FromJson<T>();
     }
 
     public ValueTask Remove(string key) => _jsRuntime.InvokeVoidAsync("localStorage.removeItem", key);

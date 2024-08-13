@@ -10,7 +10,8 @@ public interface IServerCollection
 }
 
 public class ServerCollection(
-    ILocalStorage _localStorage
+    ILocalStorage _localStorage,
+    IHttpClientFactory _httpClientFactory
     ): IServerCollection
 {
     private const string ServerListKey = "servers";
@@ -27,12 +28,19 @@ public class ServerCollection(
         if (all.Any(x => x.Equals(server)))
             throw new Exception("Duplicated server entry.");
 
-        server.Id = (int) DateTime.Now.Ticks;
+        server.Id = _servers!.Count + 1;
 
-        _servers!.Add(server);
+        _servers.Add(server);
 
         await _localStorage.Set(ServerListKey, _servers);
     }
 
-    public async Task<Server?> Get(int id) => (await GetAll()).FirstOrDefault(x => x.Id == id);
+    public async Task<Server?> Get(int id)
+    {
+        var result = (await GetAll()).FirstOrDefault(x => x.Id == id);
+
+        result?.SetHttpClient(_httpClientFactory.Create(result.ApiUrl));
+
+        return result;
+    }
 }
