@@ -1,0 +1,17 @@
+﻿@page "/server/{Id:int}"
+
+@inject IServerCollection _severCollection;
+
+<h2>@(server?.Name ?? "Not Found")</h2>
+
+@code{
+    [Parameter]
+    public int Id { get; set; }
+
+    Server? server;
+
+    protected override async Task OnInitializedAsync()
+    {
+        server = await _severCollection.Get(Id);
+    }
+}
