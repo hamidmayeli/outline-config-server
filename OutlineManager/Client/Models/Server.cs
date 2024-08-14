@@ -24,7 +24,7 @@ public class Server
 
     public void SetHttpClient(HttpClient httpClient) => _httpClient = httpClient;
 
-    public async Task<string[]> LoadKeys()
+    public async Task<IEnumerable<AccessKey>> LoadKeys()
     {
         try
         {
@@ -34,14 +34,15 @@ public class Server
             var useage = await HttpClient.GetFromJsonAsync<UsageResponse>($"{GetApiPrefix()}/metrics/transfer", JsonExtensions.Options);
 
             foreach (var key in accessKeyCollection.AccessKeys)
-                if(useage?.BytesTransferredByUserId.TryGetValue(key.Id, out var value) == true)
-                    key.UsageInBytes = value;
+                if (useage?.BytesTransferredByUserId.TryGetValue(key.Id, out var value) == true)
+                    key.DataLimit.Consumed = value;
+
+            return accessKeyCollection.AccessKeys;
         }
         catch (Exception exception)
         {
+            return [];
         }
-
-        return [];
     }
 
     private string GetApiPrefix() => _apiPrefix ??= new Uri(ApiUrl).PathAndQuery;

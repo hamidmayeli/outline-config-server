@@ -2,23 +2,42 @@
 
 @inject IServerCollection _severCollection;
 
-<h2>@(_server?.Name ?? "Not Found")</h2>
+<h2>@(_server?.Name ?? _notFoundText)</h2>
+
+<p>@_desc</p>
+
+<div>
+    @foreach (var key in _keys)
+    {
+        <div class="p-4 flex w-full">
+            <h4 class="bold text-bold flex-1">@key.Name</h4>
+            <div class="flex-1">@key.DataLimit.Consumed.ToHumanReadableBytes()/@(key.DataLimit.Bytes?.ToHumanReadableBytes() ?? "∞")</div>
+            <div class="flex-1">Copy Key</div>
+        </div>
+    }
+</div>
 
 @code{
     [Parameter]
     public int Id { get; set; }
 
+    private string _desc = "some value to test";
+    private string _notFoundText = "";
     private Server? _server;
-    private IEnumerable<string> _keys = [];
+    private IEnumerable<AccessKey> _keys = [];
 
     protected override async Task OnInitializedAsync()
     {
         _server = await _severCollection.Get(Id);
-        await LoadKeys();
+        _notFoundText = "Not Found";
+        LoadKeys().RunInParallel();
     }
 
     private async Task LoadKeys()
     {
-        var keys = await _server!.LoadKeys();
+        await Task.Delay(5000);
+        _keys = await _server!.LoadKeys();
+        _desc = $"keys are loaded ({_keys.Count()})";
+        StateHasChanged();
     }
 }

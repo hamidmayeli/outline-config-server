@@ -16,6 +16,9 @@ module.exports = () => ({
                 password: "Z1se",
                 port: 123,
                 method: "chacha20-ietf-poly1305",
+                dataLimit: {
+                    bytes: 120000000000
+                },
                 accessUrl: "ss://sdasdasdasdasda@127.0.0.1:123/?outline=1"
             },
             {
@@ -32,6 +35,9 @@ module.exports = () => ({
                 password: "P1se",
                 port: 123,
                 method: "chacha20-ietf-poly1305",
+                dataLimit: {
+                    bytes: 12000000000
+                },
                 accessUrl: "ss://sdasdasdasdasda@127.0.0.1:123/?outline=1"
             },
             {
