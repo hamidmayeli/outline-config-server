@@ -1,0 +1,47 @@
+﻿@page "/server/{Id:int}"
+
+@inject IKeyService _keyService;
+@inject IServerService _services;
+
+<h2>@(_server?.Name ?? _notFoundText)</h2>
+
+<p>@_desc</p>
+
+<div>
+    @foreach (var key in _keys)
+    {
+        <div class="p-4 flex w-full">
+            <h4 class="bold text-bold flex-1">@key.Name</h4>
+            <div class="flex-1">@key.DataLimit.Consumed.ToHumanReadableBytes() / @(key.DataLimit.Bytes?.ToGB() ?? "∞")</div>
+            <div class="flex-1">Copy Key</div>
+        </div>
+    }
+</div>
+
+@code{
+    [Parameter]
+    public int Id { get; set; }
+
+    private string _desc = "some value to test";
+    private string _notFoundText = "";
+    private ServerModel? _server;
+    private IEnumerable<AccessKeyResponse> _keys = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _server = await _services.Get(Id);
+        
+        if (_server is null)
+            _notFoundText = "Not Found";
+        else
+            await LoadKeys();
+    }
+
+    private async Task LoadKeys()
+    {
+        await Task.Delay(5000);
+        _keys = await _keyService!.GetAll(_server!);
+        _desc = $"keys are loaded ({_keys.Count()})";
+        StateHasChanged();
+    }
+}

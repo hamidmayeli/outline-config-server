@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34902.65
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "Client\Client.csproj", "{C172651E-3868-4667-8E0D-434AFEE9A41B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutlineManager", "OutlineManager\OutlineManager.csproj", "{9DC42B26-B0E5-4689-9DE0-0DEF538480E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C172651E-3868-4667-8E0D-434AFEE9A41B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C172651E-3868-4667-8E0D-434AFEE9A41B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C172651E-3868-4667-8E0D-434AFEE9A41B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C172651E-3868-4667-8E0D-434AFEE9A41B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9DC42B26-B0E5-4689-9DE0-0DEF538480E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DC42B26-B0E5-4689-9DE0-0DEF538480E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DC42B26-B0E5-4689-9DE0-0DEF538480E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DC42B26-B0E5-4689-9DE0-0DEF538480E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {9B49E652-08F0-4625-BC72-50CB8008F26F}
+		SolutionGuid = {B276B4D3-DB3D-42A6-88F0-DEA568239091}
 	EndGlobalSection
 EndGlobal
