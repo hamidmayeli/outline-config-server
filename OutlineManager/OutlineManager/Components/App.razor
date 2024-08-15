@@ -7,11 +7,12 @@
     <base href="/" />
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="OutlineManager.styles.css" />
-    <HeadOutlet @rendermode="InteractiveWebAssembly" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveWebAssembly" />
+    <Routes @rendermode="InteractiveServer" />
     <script src="_framework/blazor.web.js"></script>
 </body>
 
