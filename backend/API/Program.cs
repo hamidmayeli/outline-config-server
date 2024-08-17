@@ -75,16 +75,32 @@ builder.Services
 builder.Services.Configure<AuthenticationSettings>(
     options => builder.Configuration.GetSection("Authentication").Bind(options));
 
-var app = builder.Build();
+#if DEBUG
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+#endif
 
-app.UseDefaultFiles();
-app.UseStaticFiles();
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors("AllowSpecificOrigin");
+}
+else
+{
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
 }
 
 app.UseHttpsRedirection();
