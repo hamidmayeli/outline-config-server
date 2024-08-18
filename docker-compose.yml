@@ -8,7 +8,7 @@ services:
       - ./data/ssl:/ssl
     entrypoint: >
       sh -c "openssl req -x509 -nodes -days 365 -newkey rsa:2048 
-      -keyout /ssl/the.key -out /ssl/the.crt -subj '/C=US/ST=State/L=City/O=Organization/OU=Department/CN=etemadify.com' && 
+      -keyout /ssl/the.key -out /ssl/the.crt -subj '/C=US/ST=State/L=City/O=Organization/OU=Department/CN=${DOMAIN:-etemadify.com}' && 
       cat /ssl/the.crt /ssl/the.key > /ssl/the.pem"
 
   api:
