@@ -8,9 +8,8 @@ services:
       - ./data/ssl:/ssl
     entrypoint: >
       sh -c "openssl req -x509 -nodes -days 365 -newkey rsa:2048 
-      -keyout /ssl/nazarsanj.local.key -out /ssl/nazarsanj.local.crt -subj '/C=US/ST=State/L=City/O=Organization/OU=Department/CN=nazarsanj.local' && 
-      cat /ssl/nazarsanj.local.crt /ssl/nazarsanj.local.key > /ssl/nazarsanj.local.pem"
-
+      -keyout /ssl/the.key -out /ssl/the.crt -subj '/C=US/ST=State/L=City/O=Organization/OU=Department/CN=etemadify.com' && 
+      cat /ssl/the.crt /ssl/the.key > /ssl/the.pem"
 
   api:
     depends_on:
@@ -25,8 +24,8 @@ services:
       - ./data/keys:/root/.aspnet/DataProtection-Keys
     environment:
       # - ASPNETCORE_Kestrel__Certificates__Default__Password=yourpassword
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/ssl/nazarsanj.local.pem
-      - ASPNETCORE_Kestrel__Certificates__Default__KeyPath=/ssl/nazarsanj.local.key
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/ssl/the.pem
+      - ASPNETCORE_Kestrel__Certificates__Default__KeyPath=/ssl/the.key
     ports:
       - 80:80
       - 443:443
