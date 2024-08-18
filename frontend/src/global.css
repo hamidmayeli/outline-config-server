@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        font-family: Sahel;
+    }
+
+    .input,
+    input[type=text],
+    input[type=file],
+    input[type=number],
+    select,
+    textarea {
+        @apply p-1 rounded md:rounded-md lg:rounded-lg bg-white dark:bg-slate-600 dark:disabled:bg-slate-900 border dark:valid:border-none invalid:border-red-300;
+    }
+
+    .input.invalid{
+        @apply border-red-300;
+    }
+    
+    @font-face {
+        font-family: Sahel;
+        src: url("/fonts/Sahel.eot");
+        src: url("/fonts/Sahel.eot?#iefix") format("Sahel-opentype"), url("/fonts/Sahel.woff") format("woff"),
+            url("/fonts/Sahel.ttf") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    @font-face {
+        font-family: Sahel-Bold;
+        src: url("/fonts/Sahel-Bold.eot");
+        src: url("/fonts/Sahel-Bold.eot?#iefix") format("Sahel-Bold-opentype"), url("/fonts/Sahel-Bold.woff") format("woff"),
+            url("/fonts/Sahel-Bold.ttf") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+    }
+}
+
+.bg-header {
+    @apply bg-sky-100 dark:bg-gray-900;
+}
+
+.bg-layout {
+    @apply bg-slate-50 dark:bg-gray-950;
+}
+
+.text-shadow {
+    text-shadow: 0 1px 5px black;
+}
+
+.btn {
+    @apply px-3 py-1 rounded bg-brand dark:bg-slate-200 text-white dark:text-brand;
+}
+
+.boxed-area {
+    @apply p-4 bg-white dark:bg-gray-900 rounded-md shadow hover:shadow-lg dark:shadow-slate-700;
+}
+
+.grecaptcha-badge { 
+    visibility: hidden;
+}

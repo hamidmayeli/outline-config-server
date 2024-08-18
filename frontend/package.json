@@ -1,0 +1,46 @@
+{
+  "name": "my-vite-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently --kill-others \"npx json-server -w json-server/data.cjs -r json-server/routing.json -m json-server/middleware.cjs --host 127.0.0.1 -p 4000\" \"vite\"",
+    "build": "tsc && vite build",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "test-e2e": "start-server-and-test dev \"http://localhost:5173|http://127.0.0.1:4000\" \"cypress open --e2e\"",
+    "test-e2e:headless": "start-server-and-test dev \"http://localhost:5173|http://127.0.0.1:4000\" \"cypress run --e2e\"",
+    "test-component": "cypress open --component",
+    "test-component:headless": "cypress run --component"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.0"
+  },
+  "devDependencies": {
+    "@cypress/code-coverage": "^3.12.44",
+    "@faker-js/faker": "^8.3.1",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.1",
+    "@typescript-eslint/parser": "^8.0.1",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^8.2.2",
+    "cypress": "^13.13.2",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.9",
+    "json-server": "^0.17.4",
+    "postcss": "^8.4.41",
+    "start-server-and-test": "^2.0.5",
+    "tailwindcss": "^3.4.9",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0",
+    "vite-plugin-istanbul": "^6.0.2",
+    "vite-plugin-pwa": "^0.20.1",
+    "vite-tsconfig-paths": "^5.0.1"
+  }
+}
+
