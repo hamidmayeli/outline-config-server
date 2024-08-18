@@ -39,14 +39,14 @@ class BaseAPI {
         return `${import.meta.env.VITE_API_HOST}${url}`;
 
     }
-    
+
     public addUserToken = (headers: Headers) => {
         const user = privateStorage.load<ICurrentUser>("ed457k");
         if (user?.token) {
             headers.append("Authorization", "Bearer " + user.token);
         }
     };
-    
+
     public refreshUserData = async () => {
         if (hookHack.hostname !== "localhost") {
             const user = await this.refreshToken();

@@ -9,7 +9,7 @@ public class HttpClientFactory : IHttpClientFactory
 {
     public HttpClient Create(string apiUrl)
     {
-        //var uri = new Uri(apiUrl);
+        var uri = new Uri(apiUrl);
 
         var handler = new HttpClientHandler
         {
@@ -19,7 +19,7 @@ public class HttpClientFactory : IHttpClientFactory
 
         return new(handler)
         {
-            BaseAddress = new Uri(apiUrl), //new Uri($"{uri.Scheme}://{uri.Host}:{uri.Port}"),
+            BaseAddress = new Uri($"{uri.Scheme}://{uri.Host}:{uri.Port}"),
         };
     }
 }

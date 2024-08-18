@@ -61,25 +61,6 @@ public class UserService(
         return user;
     }
 
-    //public string GenerateAccessToken(UserModel user)
-    //{
-    //    var tokenHandler = new JwtSecurityTokenHandler();
-    //    var key = Encoding.ASCII.GetBytes(_authenticationSettings.Value.Secret);
-    //    var tokenDescriptor = new SecurityTokenDescriptor
-    //    {
-    //        Subject = new ClaimsIdentity([new Claim(ClaimTypes.Name, user.Id.ToString())]),
-    //        Expires = _dateTimeService.UtcNow.AddMinutes(15),
-    //        SigningCredentials = new SigningCredentials(
-    //            new SymmetricSecurityKey(key),
-    //            SecurityAlgorithms.HmacSha256Signature)
-    //    };
-    //    var tokenObject = tokenHandler.CreateToken(tokenDescriptor);
-
-    //    _logger.LogDebug("A new access token generated for {userId}", user.Id);
-
-    //    return tokenHandler.WriteToken(tokenObject);
-    //}
-
     public string GenerateAccessToken(UserModel user)
     {
         var key = Encoding.ASCII.GetBytes(_authenticationSettings.Value.Secret);
@@ -88,7 +69,7 @@ public class UserService(
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity([new Claim(ClaimTypes.Name, user.Id.ToString())]),
-            Expires = _dateTimeService.UtcNow.AddMinutes(15),
+            Expires = _dateTimeService.UtcNow.AddMinutes(_authenticationSettings.Value.AccessTokenTimeOut),
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(key),
                 SecurityAlgorithms.HmacSha256),

@@ -5,6 +5,7 @@ import RootLayout from 'pages/layout';
 import Anonymous from 'components/anonymous';
 import LoginPage from 'pages/Login';
 import Protected from 'components/protected';
+import Server from 'pages/Server';
 
 const App = lazy(() => import('pages/App'));
 const NewServer = lazy(() => import('pages/NewServer'));
@@ -25,7 +26,11 @@ const router = createBrowserRouter([
         {
           path: "/login",
           element: <Anonymous><LoginPage /></Anonymous>
-        }
+        },
+        {
+          path: "server/:serverId",
+          element: <Protected><Server /></Protected>,
+        },
       ]
     }
   ]);
