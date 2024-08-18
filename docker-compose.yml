@@ -1,0 +1,32 @@
+version: '3.7'
+
+services:
+  generate-ssl:
+    image: alpine/openssl
+    container_name: generate-ssl
+    volumes:
+      - ./data/ssl:/ssl
+    entrypoint: >
+      sh -c "openssl req -x509 -nodes -days 365 -newkey rsa:2048 
+      -keyout /ssl/nazarsanj.local.key -out /ssl/nazarsanj.local.crt -subj '/C=US/ST=State/L=City/O=Organization/OU=Department/CN=nazarsanj.local' && 
+      cat /ssl/nazarsanj.local.crt /ssl/nazarsanj.local.key > /ssl/nazarsanj.local.pem"
+
+
+  api:
+    depends_on:
+      generate-ssl:
+        condition: service_completed_successfully
+    image: hamidmayeli/olm:latest
+    container_name: api
+    restart: always
+    volumes:
+      - ./data/db:/data
+      - ./data/ssl:/ssl
+      - ./data/keys:/root/.aspnet/DataProtection-Keys
+    environment:
+      # - ASPNETCORE_Kestrel__Certificates__Default__Password=yourpassword
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/ssl/nazarsanj.local.pem
+      - ASPNETCORE_Kestrel__Certificates__Default__KeyPath=/ssl/nazarsanj.local.key
+    ports:
+      - 80:80
+      - 443:443

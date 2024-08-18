@@ -51,7 +51,7 @@ EXPOSE 80
 EXPOSE 443
 
 # Set the environment variable for the certificate
-ENV ASPNETCORE_Kestrel__Certificates__Default__Password=password
-ENV ASPNETCORE_Kestrel__Certificates__Default__Path=/root/.aspnet/https/aspnetapp.pfx
+# ENV ASPNETCORE_Kestrel__Certificates__Default__Password=password
+# ENV ASPNETCORE_Kestrel__Certificates__Default__Path=/root/.aspnet/https/aspnetapp.pfx
 
 ENTRYPOINT ["./API"]
