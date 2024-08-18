@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { lazy, Suspense } from 'react';
+import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import RootLayout from 'pages/layout';
 import Anonymous from 'components/anonymous';
@@ -7,7 +7,7 @@ import LoginPage from 'pages/Login';
 import Protected from 'components/protected';
 
 const App = lazy(() => import('pages/App'));
-const SecondPage = lazy(() => import('pages/SecondPage'));
+const NewServer = lazy(() => import('pages/NewServer'));
 
 const router = createBrowserRouter([
     {
@@ -16,11 +16,11 @@ const router = createBrowserRouter([
       children: [
         {
           path: "/",
-          element: <Suspense><App /></Suspense>,
+          element: <Protected><App /></Protected>,
         },
         {
-          path: "/second",
-          element: <Protected><SecondPage /></Protected>,
+          path: "/new-server",
+          element: <Protected><NewServer /></Protected>,
         },
         {
           path: "/login",

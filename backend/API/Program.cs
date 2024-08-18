@@ -1,3 +1,4 @@
+using API;
 using API.Extensions;
 using API.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -6,6 +7,8 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.AddConsole();
 
 // Add services to the container.
 
@@ -52,10 +55,15 @@ builder.Services.AddAuthentication(options =>
     })
     .AddJwtBearer(options =>
     {
-        var secret = builder.Configuration.GetValue("Authentication:Secret", "default");
+        var secret = builder.Configuration.GetValue<string>("Authentication:Secret")
+            ?? throw new MissingSettingException("Authentication:Secret");
         var key = Encoding.ASCII.GetBytes(secret!);
-        var issuer = builder.Configuration.GetValue("Authentication:Issuer", "https://yourdomain.com");
 
+        var issuer = builder.Configuration.GetValue<string>("Authentication:Issuer")
+            ?? throw new MissingSettingException("Authentication:Issuer");
+
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -64,7 +72,20 @@ builder.Services.AddAuthentication(options =>
             ValidateIssuerSigningKey = true,
             ValidIssuer = issuer,
             ValidAudience = issuer,
-            IssuerSigningKey = new SymmetricSecurityKey(key)
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<API.Services.UserService>>();
+
+                logger.LogError(context.Exception, "========== Authentication failed {message}", context.Exception.Message);
+
+                return Task.CompletedTask;
+            }
         };
     });
 
@@ -97,9 +118,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.UseCors("AllowSpecificOrigin");
 }
-
-app.UseDefaultFiles();
-app.UseStaticFiles();
+else
+{
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
+}
 
 app.UseHttpsRedirection();
 

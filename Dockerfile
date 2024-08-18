@@ -34,7 +34,6 @@ RUN npm ci
 
 COPY ./frontend .
 # RUN npm run lint && npm run build
-RUN cat .env
 RUN npm run build
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final

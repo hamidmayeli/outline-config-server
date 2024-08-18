@@ -39,6 +39,8 @@ public class UserService(
 
     public UserModel Create(string username, string password)
     {
+        _logger.LogInformation("Creating a new user '{user}'", username);
+
         username = username.ToLowerInvariant();
 
         if (Users.Find(x => x.Username == username).Any())
@@ -59,19 +61,43 @@ public class UserService(
         return user;
     }
 
+    //public string GenerateAccessToken(UserModel user)
+    //{
+    //    var tokenHandler = new JwtSecurityTokenHandler();
+    //    var key = Encoding.ASCII.GetBytes(_authenticationSettings.Value.Secret);
+    //    var tokenDescriptor = new SecurityTokenDescriptor
+    //    {
+    //        Subject = new ClaimsIdentity([new Claim(ClaimTypes.Name, user.Id.ToString())]),
+    //        Expires = _dateTimeService.UtcNow.AddMinutes(15),
+    //        SigningCredentials = new SigningCredentials(
+    //            new SymmetricSecurityKey(key),
+    //            SecurityAlgorithms.HmacSha256Signature)
+    //    };
+    //    var tokenObject = tokenHandler.CreateToken(tokenDescriptor);
+
+    //    _logger.LogDebug("A new access token generated for {userId}", user.Id);
+
+    //    return tokenHandler.WriteToken(tokenObject);
+    //}
+
     public string GenerateAccessToken(UserModel user)
     {
-        var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_authenticationSettings.Value.Secret);
+        var issuer = _authenticationSettings.Value.Issuer;
+
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity([new Claim(ClaimTypes.Name, user.Id.ToString())]),
             Expires = _dateTimeService.UtcNow.AddMinutes(15),
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(key),
-                SecurityAlgorithms.HmacSha256Signature),
-            Issuer = _authenticationSettings.Value.Issuer,
+                SecurityAlgorithms.HmacSha256),
+            Issuer = issuer,
+            Audience = issuer,
+            IssuedAt = DateTime.UtcNow,
         };
+
+        var tokenHandler = new JwtSecurityTokenHandler();
         var tokenObject = tokenHandler.CreateToken(tokenDescriptor);
 
         _logger.LogDebug("A new access token generated for {userId}", user.Id);
