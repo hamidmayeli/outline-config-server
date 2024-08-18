@@ -6,9 +6,14 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      screens: {
+        xs: "320px",
+      },
+      colors:{
+        "brand": "#0c4a6e"
+      }
+    },
   },
   plugins: [],
 }
-
-
