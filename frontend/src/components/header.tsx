@@ -1,4 +1,7 @@
+import Logo from "assets/logo";
+import { useContext } from "react";
 import { Link } from "react-router-dom";
+import { AppContext } from "./appContext";
 
 export default function Header({
   isDark,
@@ -7,6 +10,8 @@ export default function Header({
   isDark: boolean,
   themeChanged: (isDark: boolean) => void,
 }) {
+  const { currentUser, logout } = useContext(AppContext);
+
   const toggle = (reverseCondition?: boolean) => {
     if (!reverseCondition) {
       themeChanged(!isDark);
@@ -17,12 +22,14 @@ export default function Header({
     <header className="border-b-gray-500 bg-sky-100 dark:bg-gray-900 text-gray-800
       dark:text-slate-200 h-14 px-1 md:px-2 shadow dark:shadow-slate-800 z-50 relative">
       <nav className="flex max-w-5xl mx-auto h-full justify-center items-center">
-        <Link to="/" className="flex justify-center items-center">
-          <span>LOGO</span>
-        </Link>
+        <div className="flex justify-center items-center flex-shrink-0">
+          <Link to="/" >
+            <Logo className="w-8" />
+          </Link>
+          {currentUser ? (<button onClick={() => logout()} className="px-3">Logout</button>) : null}
+        </div>
 
         <div className="p-2 w-full">
-          <input type="text" placeholder="Search" className="w-full md:w-1/2 border-none" />
         </div>
 
         <div className="px-2 flex items-center h-full shrink-0">

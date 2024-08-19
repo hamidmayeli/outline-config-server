@@ -17,15 +17,15 @@ public class AuthController(
     [AllowAnonymous]
     public async Task<Results<NoContent, Ok<SuccessLoginDto>>> Login([FromBody] LoginInfoDto loginInfo)
     {
-        var user = _userService.HasAnyUser() 
-            ? _userService.Get(loginInfo.Username, loginInfo.Password)
-            : _userService.Create(loginInfo.Username, loginInfo.Password);
+        var user = await _userService.HasAnyUser() 
+            ? await _userService.Get(loginInfo.Username, loginInfo.Password)
+            : await _userService.Create(loginInfo.Username, loginInfo.Password);
 
         if (user is not null)
         {
-            var refreshToken = _userService.GenerateRefreshToken(user);
+            var refreshToken = await _userService.GenerateRefreshToken(user);
 
-            return TypedResults.Ok(CreateCookieAndDto(user, refreshToken));
+            return TypedResults.Ok(await CreateCookieAndDto(user, refreshToken));
         }
         else
             return TypedResults.NoContent();
@@ -40,15 +40,27 @@ public class AuthController(
         if (string.IsNullOrWhiteSpace(token))
             return TypedResults.Forbid();
 
-        var (user, refreshToken) = _userService.Validate(token);
+        var (user, refreshToken) = await _userService.Validate(token);
 
         if (user is null || refreshToken is null)
             return TypedResults.Forbid();
 
-        return TypedResults.Ok(CreateCookieAndDto(user, refreshToken));
+        return TypedResults.Ok(await CreateCookieAndDto(user, refreshToken));
     }
 
-    private SuccessLoginDto CreateCookieAndDto(UserModel user, RefreshTokenModel refreshToken)
+    [HttpDelete("login")]
+    [AllowAnonymous]
+    public async Task<NoContent> LogOut()
+    {
+        var token = Request.Cookies[RefreshTokenCookieKey];
+
+        if (!string.IsNullOrWhiteSpace(token))
+            await _userService.DeleteRefreshToken(token);
+
+        return TypedResults.NoContent();
+    }
+
+    private async Task<SuccessLoginDto> CreateCookieAndDto(UserModel user, RefreshTokenModel refreshToken)
     {
         Response.Cookies.Append(
             RefreshTokenCookieKey,
@@ -65,6 +77,6 @@ public class AuthController(
         return new SuccessLoginDto(
             user.Id,
             user.Username,
-            _userService.GenerateAccessToken(user));
+            await _userService.GenerateAccessToken(user));
     }
 }

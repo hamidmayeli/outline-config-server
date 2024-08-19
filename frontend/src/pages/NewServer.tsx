@@ -28,12 +28,12 @@ export default function NewServer() {
                 <h1 className="py-4 text-2xl">Follow the instructions below</h1>
                 <p className="mb-6">These steps will help you install Outline on a Linux server.</p>
 
-                <div className="mb-6">
+                <div className="mb-6 boxed-area">
                     <p>Log into your server, and run this command.</p>
                     <textarea className="w-full border">sudo bash -c "$(wget -qO- https://raw.githubusercontent.com/Jigsaw-Code/outline-server/master/src/server_manager/install_scripts/install_server.sh)"</textarea>
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-6 boxed-area">
                     <p>Paste your installation output here.</p>
                     <textarea
                         onChange={handleChange}

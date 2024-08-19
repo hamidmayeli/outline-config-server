@@ -80,17 +80,31 @@ echo "DOMAIN=${DOMAIN}" > .env
 # Run Docker Compose
 docker compose up -d
 
-echo "docker run --name certbot-renew -it --rm \
+# Create renew certs
+echo "#!/bin/bash
+
+# Change to the directory where your docker-compose.yml is located
+cd ${CURRENT_PATH}
+
+docker compose down
+
+docker run -d -v ./ data/webroot:/usr/share/nginx/html -p 80:80 --name nginx nginx
+
+docker run --name certbot-renew -it --rm \
   -v ./data/webroot:/home/webroot \
   -v ./data/ssl:/data/ssl \
   --entrypoint /bin/sh \
   certbot/certbot -c \"certbot renew --webroot -w /home/webroot --cert-name my-ssl && cat /etc/letsencrypt/live/my-ssl/fullchain.pem > /data/ssl/the.pem && cat /etc/letsencrypt/live/my-ssl/privkey.pem > /data/ssl/the.key\"
+
+docker rm -f nginx
+docker compose up -d
 " > /tmp/renew-certs.sh
 
 chmod +x /tmp/renew-certs.sh
 
 echo "0 2 1 1,3,5,7,9,11 * /tmp/renew-certs.sh" > /tmp/crontab.job
 
+# Create update.sh
 echo "#!/bin/bash
 
 # Change to the directory where your docker-compose.yml is located

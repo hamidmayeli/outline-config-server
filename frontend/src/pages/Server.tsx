@@ -24,13 +24,25 @@ export default function Server() {
             .catch(err => console.error(err));
     }, [serverId]);
 
+    const copyToClipboard = (accessUrl: string) => {
+        navigator.clipboard.writeText(accessUrl)
+            .then(() => alert("Copied!"))
+            .catch(() => { });
+    };
+
     if (serverInfo)
         return (
             <>
-                <h1>{serverInfo.name}</h1>
-                {keys.map(key => (<div key={key.id} className="flex border-b">
+                <h1 className="text-2xl text-center mb-5">{serverInfo.name}</h1>
+                {keys.map(key => (<div key={key.id} className="flex boxed-area mb-2 items-center">
                     <div className="w-1/3">{key.name}</div>
-                    <div><span>{toHumanReadableBytes(key.dataLimit.consumed)}</span> / <span>{(key.dataLimit.bytes ? toHumanReadableBytes(key.dataLimit.bytes) : "∞")}</span></div>
+                    <div className="flex-grow">
+                        <span>{toHumanReadableBytes(key.dataLimit.consumed)}</span> / <span>{(key.dataLimit.bytes ? toHumanReadableBytes(key.dataLimit.bytes) : "∞")}</span>
+                    </div>
+                    <div className="btn"
+                        onClick={() => copyToClipboard(key.accessUrl)}>
+                        Copy
+                    </div>
                 </div>))}
             </>
         );

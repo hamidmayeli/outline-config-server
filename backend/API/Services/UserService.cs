@@ -13,17 +13,19 @@ namespace API.Services;
 
 public interface IUserService
 {
-    UserModel? Get(string username, string password);
+    Task<UserModel?> Get(string username, string password);
 
-    UserModel Create(string username, string password);
+    Task<UserModel> Create(string username, string password);
 
-    string GenerateAccessToken(UserModel user);
+    Task<string> GenerateAccessToken(UserModel user);
 
-    RefreshTokenModel GenerateRefreshToken(UserModel user);
+    Task<RefreshTokenModel> GenerateRefreshToken(UserModel user);
 
-    (UserModel?, RefreshTokenModel?) Validate(string stringId);
+    Task<(UserModel?, RefreshTokenModel?)> Validate(string id);
 
-    bool HasAnyUser();
+    Task<bool> HasAnyUser();
+
+    Task DeleteRefreshToken(string token);
 }
 
 public class UserService(
@@ -37,7 +39,7 @@ public class UserService(
 
     ILiteCollection<RefreshTokenModel> RefreshTokens => _database.GetCollection<RefreshTokenModel>();
 
-    public UserModel Create(string username, string password)
+    public Task<UserModel> Create(string username, string password)
     {
         _logger.LogInformation("Creating a new user '{user}'", username);
 
@@ -58,10 +60,10 @@ public class UserService(
         Users.Insert(user);
         Users.EnsureIndex(x => x.Username);
 
-        return user;
+        return Task.FromResult(user);
     }
 
-    public string GenerateAccessToken(UserModel user)
+    public Task<string> GenerateAccessToken(UserModel user)
     {
         var key = Encoding.ASCII.GetBytes(_authenticationSettings.Value.Secret);
         var issuer = _authenticationSettings.Value.Issuer;
@@ -83,14 +85,14 @@ public class UserService(
 
         _logger.LogDebug("A new access token generated for {userId}", user.Id);
 
-        return tokenHandler.WriteToken(tokenObject);
+        return Task.FromResult(tokenHandler.WriteToken(tokenObject));
     }
 
-    public RefreshTokenModel GenerateRefreshToken(UserModel user)
+    public Task<RefreshTokenModel> GenerateRefreshToken(UserModel user)
     {
         var token = new RefreshTokenModel
         {
-            Token = Guid.NewGuid().ToString(),
+            Token = Guid.NewGuid().ToString().ToLower(),
             UserId = user.Id,
             Expiry = _dateTimeService.UtcNow.AddDays(_authenticationSettings.Value.TimeOutInDays)
         };
@@ -100,36 +102,42 @@ public class UserService(
         RefreshTokens.EnsureIndex(x => x.UserId);
         RefreshTokens.EnsureIndex(x => x.Expiry);
 
-        return token;
+        return Task.FromResult(token);
     }
 
-    public UserModel? Get(string username, string password)
+    public Task<UserModel?> Get(string username, string password)
     {
         username = username.ToLowerInvariant();
 
         var user = Users.FindOne(x => x.Username == username);
 
         if (user == null || user.Password != HashPassword(password, user.Salt))
-            return null;
+            return Task.FromResult<UserModel?>(null);
 
-        return user;
+        return Task.FromResult< UserModel?>(user);
     }
 
-    public bool HasAnyUser() => Users.Count() > 0;
+    public Task<bool> HasAnyUser() => Task.FromResult(Users.Count() > 0);
 
-    public (UserModel?, RefreshTokenModel?) Validate(string id)
+    public Task<(UserModel?, RefreshTokenModel?)> Validate(string id)
     {
         var token = RefreshTokens.FindById(id);
 
-        if(token == null)
-            return (null, null);
+        if(token == null || token.Expiry <= _dateTimeService.UtcNow)
+            return Task.FromResult<(UserModel?, RefreshTokenModel?)>((null, null));
 
         var user = Users.FindById(token.UserId);
 
         if(user == null)
-            return (null, null);
+            return Task.FromResult<(UserModel?, RefreshTokenModel?)>((null, null));
 
-        return (user, token);
+        return Task.FromResult<(UserModel?, RefreshTokenModel?)>((user, token));
+    }
+
+    public Task DeleteRefreshToken(string token)
+    {
+        RefreshTokens.DeleteMany(x => x.Token == token.ToLower());
+        return Task.CompletedTask;
     }
 
     private static byte[] GenerateSalt(int size = 16)
