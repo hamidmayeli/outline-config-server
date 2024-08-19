@@ -1,20 +1,7 @@
 version: '3.7'
 
 services:
-  generate-ssl:
-    image: alpine/openssl
-    container_name: generate-ssl
-    volumes:
-      - ./data/ssl:/ssl
-    entrypoint: >
-      sh -c "openssl req -x509 -nodes -days 365 -newkey rsa:2048 
-      -keyout /ssl/the.key -out /ssl/the.crt -subj '/C=US/ST=State/L=City/O=Organization/OU=Department/CN=${DOMAIN:-etemadify.com}' && 
-      cat /ssl/the.crt /ssl/the.key > /ssl/the.pem"
-
   api:
-    depends_on:
-      generate-ssl:
-        condition: service_completed_successfully
     image: hamidmayeli/olm:latest
     container_name: api
     restart: always
@@ -23,7 +10,6 @@ services:
       - ./data/ssl:/ssl
       - ./data/keys:/root/.aspnet/DataProtection-Keys
     environment:
-      # - ASPNETCORE_Kestrel__Certificates__Default__Password=yourpassword
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/ssl/the.pem
       - ASPNETCORE_Kestrel__Certificates__Default__KeyPath=/ssl/the.key
     ports:
