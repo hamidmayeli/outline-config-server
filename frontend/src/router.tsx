@@ -5,8 +5,8 @@ import RootLayout from 'pages/layout';
 import Anonymous from 'components/anonymous';
 import LoginPage from 'pages/Login';
 import Protected from 'components/protected';
-import Server from 'pages/Server';
 
+const Server = lazy(() => import('pages/Server'));
 const App = lazy(() => import('pages/App'));
 const NewServer = lazy(() => import('pages/NewServer'));
 
