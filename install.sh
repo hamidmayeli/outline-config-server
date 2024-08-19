@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CURRENT_PATH=$0
+
 # Function to display usage
 usage() {
     echo "Usage: $0 [--host <domain>]"
@@ -41,3 +43,24 @@ echo "DOMAIN=${DOMAIN}" > .env
 
 # Run Docker Compose
 docker compose up -d
+
+echo "#!/bin/bash
+
+# Change to the directory where your docker-compose.yml is located
+cd ${CURRENT_PATH}
+
+# Pull the latest version of the Docker image
+docker-compose pull
+
+# Recreate containers with the new image (if there's an update) and remove old containers
+docker-compose up -d --remove-orphans
+
+# Optionally, remove unused images to free up space
+docker image prune -f
+" > /tmp/update.sh
+
+chmod +x /tmp/update.sh
+
+echo "0 2 * * * /tmp/update.sh" > /tmp/crontab.job
+
+crontab /tmp/crontab.job
