@@ -33,4 +33,12 @@ public class ServerController(
 
         return TypedResults.Ok(result);
     }
+
+    [HttpGet]
+    public async Task<Ok<IEnumerable<ServerDto>>> GetAll()
+    {
+        var result = await _serverService.GetAll(UserId);
+
+        return TypedResults.Ok(result);
+    }
 }

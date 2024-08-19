@@ -9,6 +9,7 @@ public interface IServerService
     Task<ServerInfo> Add(int userId, NewServerDto newServer);
     Task<ServerInfo> Get(int userId, Guid serverId);
     Task<IEnumerable<AccessKeyResponse>> GetAccessKeys(int userId, Guid serverId);
+    Task<IEnumerable<ServerDto>> GetAll(int userId);
 }
 
 public class ServerService(
@@ -71,15 +72,12 @@ public class ServerService(
         return accessKeyCollection.AccessKeys;
     }
 
+    public Task<IEnumerable<ServerDto>> GetAll(int userId)
+        => Task.FromResult(GetUser(userId).Servers.Select(x => new ServerDto(x.ServerId, x.Name)));
+
     private ServerModel FindServerLocally(int userId, Guid serverId)
     {
-        var user = Users.FindById(userId);
-
-        if (user == null)
-        {
-            _logger.LogError("User does not exist. ({userId})", userId);
-            throw new Exception("User does not exist.");
-        }
+        var user = GetUser(userId);
 
         var server = user.Servers.FirstOrDefault(x => x.ServerId == serverId);
 
@@ -90,6 +88,19 @@ public class ServerService(
         }
 
         return server;
+    }
+
+    private UserModel GetUser(int userId)
+    {
+        var user = Users.FindById(userId);
+
+        if (user == null)
+        {
+            _logger.LogError("User does not exist. ({userId})", userId);
+            throw new Exception("User does not exist.");
+        }
+
+        return user;
     }
 
     private async Task<ServerInfo?> GetServerInfo(ServerModel server)

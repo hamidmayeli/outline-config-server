@@ -8,6 +8,11 @@ interface IServerInfo {
     hostnameForAccessKeys: string;
 }
 
+interface IServerDto {
+    id: string;
+    name: string;
+}
+
 interface IAccessKeyResponse {
     id: string;
     name: string;
