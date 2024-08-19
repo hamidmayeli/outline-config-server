@@ -63,11 +63,16 @@ if ! command -v docker-compose &> /dev/null; then
     sudo apt-get install -y docker-compose
 fi
 
+# Get certificate
+docker run -d -v ./data/webroot:/usr/share/nginx/html -p 80:80 --name nginx nginx
+
 docker run --name certbot -it --rm \
     -v ./data/webroot:/home/webroot \
     -v ./data/ssl:/data/ssl \
     --entrypoint /bin/sh \
     certbot/certbot -c "certbot certonly --webroot -w /home/webroot -d ${DOMAIN} --agree-tos -m ${EMAIL} -n --cert-name my-ssl && cat /etc/letsencrypt/live/my-ssl/fullchain.pem > /data/ssl/the.pem && cat /etc/letsencrypt/live/my-ssl/privkey.pem > /data/ssl/the.key"
+
+docker rm -f nginx
 
 # Create a .env file for Docker Compose
 echo "DOMAIN=${DOMAIN}" > .env
