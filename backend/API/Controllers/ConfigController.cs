@@ -12,10 +12,10 @@ public class ConfigController(
 {
     [HttpGet("{keyId}")]
     [AllowAnonymous]
-    public async Task<Ok<string?>> Translate(Guid keyId)
+    public async Task<string?> Translate(Guid keyId)
     {
         var result = await _localKeyService.GetAccessKey(keyId);
-        return TypedResults.Ok<string?>(result);
+        return result;
     }
 
     [HttpGet]
