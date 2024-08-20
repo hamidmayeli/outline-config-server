@@ -6,5 +6,5 @@ public record ServerModel(string ApiUrl)
 
     public string Name { get; set; } = "No name";
 
-    public string ApiPrefix => new Uri(ApiUrl).PathAndQuery.TrimEnd('/');
+    public string ApiPrefix => new Uri(ApiUrl).PathAndQuery.Trim('/');
 }

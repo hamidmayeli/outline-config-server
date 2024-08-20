@@ -1,13 +1,15 @@
-﻿namespace API.Services;
+﻿using Refit;
 
-public interface IHttpClientFactory
+namespace API.Services;
+
+public interface IOutlineServerClientFactory
 {
-    HttpClient Create(string apiUrl);
+    IOutlineServerClient Create(string apiUrl);
 }
 
-public class HttpClientFactory : IHttpClientFactory
+public class OutlineServerClientFactory : IOutlineServerClientFactory
 {
-    public HttpClient Create(string apiUrl)
+    public IOutlineServerClient Create(string apiUrl)
     {
         var uri = new Uri(apiUrl);
 
@@ -17,9 +19,9 @@ public class HttpClientFactory : IHttpClientFactory
             ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => true,
         };
 
-        return new(handler)
+        return RestService.For<IOutlineServerClient>(new HttpClient(handler)
         {
             BaseAddress = new Uri($"{uri.Scheme}://{uri.Host}:{uri.Port}"),
-        };
+        });
     }
 }

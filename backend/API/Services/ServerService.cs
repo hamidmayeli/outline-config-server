@@ -15,7 +15,7 @@ public interface IServerService
 public class ServerService(
     ILiteDatabase _database,
     ILogger<ServerService> _logger,
-    IHttpClientFactory _httpClientFactory
+    IOutlineServerClientFactory _outlineClientFactory
     ) : IServerService
 {
     private ILiteCollection<UserModel> Users => _database.GetCollection<UserModel>();
@@ -58,12 +58,11 @@ public class ServerService(
     {
         var server = FindServerLocally(userId, serverId);
 
-        var client = _httpClientFactory.Create(server.ApiUrl);
+        var client = _outlineClientFactory.Create(server.ApiUrl);
 
-        var accessKeyCollection = await client.GetFromJsonAsync<AccessKeyCollectionResponse>($"{server.ApiPrefix}/access-keys")
-            ?? throw new Exception("The collection is empty");
+        var accessKeyCollection = await client.GetAccessKey(server.ApiPrefix);
 
-        var useage = await client.GetFromJsonAsync<UsageResponse>($"{server.ApiPrefix}/metrics/transfer");
+        var useage = await client.GetUsage(server.ApiPrefix);
 
         foreach (var key in accessKeyCollection.AccessKeys)
             if (useage?.BytesTransferredByUserId.TryGetValue(key.Id, out var value) == true)
@@ -105,9 +104,10 @@ public class ServerService(
 
     private async Task<ServerInfo?> GetServerInfo(ServerModel server)
     {
-        var client = _httpClientFactory.Create(server.ApiUrl);
+        var client = _outlineClientFactory.Create(server.ApiUrl);
 
-        var response = await client.GetFromJsonAsync<ServerInfo>(server.ApiPrefix + "/server");
+        var response = await client.GetServerInfo(server.ApiPrefix);
+
         return response;
     }
 }
