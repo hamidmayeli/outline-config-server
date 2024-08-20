@@ -49,7 +49,7 @@ export default function Server() {
                     </div>
                     <div className="flex flex-col gap-1">
                         <button className="btn"
-                            onClick={() => copyToClipboard(key.accessUrl)}>
+                            onClick={() => copyToClipboard(key.accessUrl + '#' + key.name)}>
                             Copy
                         </button>
                         {key.configUrl ? (
