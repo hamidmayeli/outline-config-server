@@ -21,4 +21,5 @@ interface IAccessKeyResponse {
         bytes?: number | null;
         consumed: number;
     };
+    localAccessUrl: string;
 }

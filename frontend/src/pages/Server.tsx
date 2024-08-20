@@ -9,6 +9,12 @@ export default function Server() {
     const [serverInfo, setServerInfo] = useState<IServerInfo | undefined>();
     const [keys, setKeys] = useState<IAccessKeyResponse[]>([]);
 
+    const compare = (a: IAccessKeyResponse, b: IAccessKeyResponse) => {
+        if (a.name < b.name) return -1;
+        if (a.name > b.name) return 1;
+        return 0;
+    };
+
     useEffect(() => {
         baseApi.getApi<IServerInfo>(`/v1/server/${serverId}`)
             .then(res => {
@@ -18,8 +24,10 @@ export default function Server() {
 
         baseApi.getApi<IAccessKeyResponse[]>(`/v1/server/${serverId}/keys`)
             .then(keys => {
-                if (keys)
+                if (keys) {
+                    keys.sort(compare)
                     setKeys(keys);
+                }
             })
             .catch(err => console.error(err));
     }, [serverId]);
@@ -37,11 +45,17 @@ export default function Server() {
                 {keys.map(key => (<div key={key.id} className="flex boxed-area mb-2 items-center">
                     <div className="w-1/3">{key.name}</div>
                     <div className="flex-grow">
-                        <span>{toHumanReadableBytes(key.dataLimit.consumed)}</span> / <span>{(key.dataLimit.bytes ? toHumanReadableBytes(key.dataLimit.bytes) : "∞")}</span>
+                        <span>{toHumanReadableBytes(key.dataLimit.consumed)}</span>{key.dataLimit.bytes ? (<span> / {toHumanReadableBytes(key.dataLimit.bytes)}</span>) : null}
                     </div>
-                    <div className="btn"
-                        onClick={() => copyToClipboard(key.accessUrl)}>
-                        Copy
+                    <div className="flex flex-col gap-1">
+                        <button className="btn"
+                            onClick={() => copyToClipboard(key.accessUrl)}>
+                            Copy
+                        </button>
+                        <button className="btn"
+                            onClick={() => copyToClipboard(key.localAccessUrl)}>
+                            Copy as Config
+                        </button>
                     </div>
                 </div>))}
             </>

@@ -28,9 +28,10 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddProjectServices(this IServiceCollection services)
     {
         return services
-            .AddTransient<Services.IHttpClientFactory, HttpClientFactory>()
+            .AddTransient<IOutlineServerClientFactory, OutlineServerClientFactory>()
             .AddTransient<IDateTimeService, DateTimeService>()
             .AddTransient<IUserService, UserService>()
-            .AddTransient<IServerService, ServerService>();
+            .AddTransient<IServerService, ServerService>()
+            .AddHttpContextAccessor();
     }
 }

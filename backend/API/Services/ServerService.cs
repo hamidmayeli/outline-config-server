@@ -10,15 +10,19 @@ public interface IServerService
     Task<ServerInfo> Get(int userId, Guid serverId);
     Task<IEnumerable<AccessKeyResponse>> GetAccessKeys(int userId, Guid serverId);
     Task<IEnumerable<ServerDto>> GetAll(int userId);
+    Task<string?> GetAccessKeyFromLocal(Guid serverId, Guid keyId);
 }
 
 public class ServerService(
     ILiteDatabase _database,
     ILogger<ServerService> _logger,
-    IHttpClientFactory _httpClientFactory
+    IOutlineServerClientFactory _outlineClientFactory,
+    IHttpContextAccessor _httpContextAccessor
     ) : IServerService
 {
     private ILiteCollection<UserModel> Users => _database.GetCollection<UserModel>();
+
+    private ILiteCollection<ServerLocalKeys> LocalKeys => _database.GetCollection<ServerLocalKeys>();
 
     public async Task<ServerInfo> Add(int userId, NewServerDto newServer)
     {
@@ -58,22 +62,63 @@ public class ServerService(
     {
         var server = FindServerLocally(userId, serverId);
 
-        var client = _httpClientFactory.Create(server.ApiUrl);
+        var accessKeyCollection = await LoagRemoteAccessKeys(server);
 
-        var accessKeyCollection = await client.GetFromJsonAsync<AccessKeyCollectionResponse>($"{server.ApiPrefix}/access-keys")
-            ?? throw new Exception("The collection is empty");
+        var request = _httpContextAccessor.HttpContext?.Request;
 
-        var useage = await client.GetFromJsonAsync<UsageResponse>($"{server.ApiPrefix}/metrics/transfer");
+        var localKeys = _database.GetCollection<ServerLocalKeys>().FindById(serverId)
+            ?? new () { ServerId = serverId };
+
+        var newKeys = new List<LocalAccessKey>();
+
+        foreach (var accessKey in accessKeyCollection.AccessKeys)
+        {
+            var localKey = localKeys.LocalAccessKeys.FirstOrDefault(x => x.RemoteId == accessKey.Id);
+
+            if (localKey == null)
+            {
+                localKey = new LocalAccessKey(Guid.NewGuid(), accessKey.Id, accessKey.AccessUrl);
+                newKeys.Add(localKey);
+            }
+
+            accessKey.LocalAccessUrl = $"ssconf://{request?.Host}/api/v1/config/{serverId}/{localKey.LocalId}";
+        }
+
+        if(newKeys.Count != 0)
+        {
+            localKeys.LocalAccessKeys.AddRange(newKeys);
+            LocalKeys.Upsert(localKeys);
+        }
+
+        return accessKeyCollection.AccessKeys;
+    }
+
+    private async Task<AccessKeyCollectionResponse> LoagRemoteAccessKeys(ServerModel server)
+    {
+        var client = _outlineClientFactory.Create(server.ApiUrl);
+
+        var accessKeyCollection = await client.GetAccessKey(server.ApiPrefix);
+
+        var useage = await client.GetUsage(server.ApiPrefix);
 
         foreach (var key in accessKeyCollection.AccessKeys)
             if (useage?.BytesTransferredByUserId.TryGetValue(key.Id, out var value) == true)
                 key.DataLimit.Consumed = value;
 
-        return accessKeyCollection.AccessKeys;
+        return accessKeyCollection;
     }
 
     public Task<IEnumerable<ServerDto>> GetAll(int userId)
         => Task.FromResult(GetUser(userId).Servers.Select(x => new ServerDto(x.ServerId, x.Name)));
+
+    public Task<string?> GetAccessKeyFromLocal(Guid serverId, Guid keyId)
+    {
+        var keys = LocalKeys.FindById(serverId) ?? new ();
+
+        var key = keys.LocalAccessKeys.FirstOrDefault(x => x.LocalId == keyId);
+
+        return Task.FromResult(key?.AccessUrl);
+    }
 
     private ServerModel FindServerLocally(int userId, Guid serverId)
     {
@@ -105,9 +150,10 @@ public class ServerService(
 
     private async Task<ServerInfo?> GetServerInfo(ServerModel server)
     {
-        var client = _httpClientFactory.Create(server.ApiUrl);
+        var client = _outlineClientFactory.Create(server.ApiUrl);
 
-        var response = await client.GetFromJsonAsync<ServerInfo>(server.ApiPrefix + "/server");
+        var response = await client.GetServerInfo(server.ApiPrefix);
+
         return response;
     }
 }
