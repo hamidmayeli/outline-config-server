@@ -9,6 +9,7 @@ import Protected from 'components/protected';
 const Server = lazy(() => import('pages/Server'));
 const App = lazy(() => import('pages/App'));
 const NewServer = lazy(() => import('pages/NewServer'));
+const LocalKeys = lazy(() => import('pages/LocalKeys'));
 
 const router = createBrowserRouter([
     {
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
         {
           path: "/new-server",
           element: <Protected><NewServer /></Protected>,
+        },
+        {
+          path: "/local-keys",
+          element: <Protected><LocalKeys /></Protected>,
         },
         {
           path: "/login",

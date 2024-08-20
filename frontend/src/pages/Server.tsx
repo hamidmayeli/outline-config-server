@@ -52,10 +52,12 @@ export default function Server() {
                             onClick={() => copyToClipboard(key.accessUrl)}>
                             Copy
                         </button>
-                        <button className="btn"
-                            onClick={() => copyToClipboard(key.localAccessUrl)}>
-                            Copy as Config
-                        </button>
+                        {key.configUrl ? (
+                            <button className="btn"
+                                onClick={() => copyToClipboard(key.configUrl!)}>
+                                Copy as Config
+                            </button>
+                        ) : null}
                     </div>
                 </div>))}
             </>
