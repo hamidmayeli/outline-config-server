@@ -25,7 +25,7 @@ public class LocalKeyService(
         var request = _httpContextAccessor.HttpContext?.Request
             ?? throw new InvalidOperationException();
 
-        key.ConfigUrl = $"ssconf://{request.Host}/api/v1/config/{key.Id}";
+        key.ConfigUrl = $"ssconf://{request.Host}/api/v1/config/{key.Id}#{key.Name}";
 
         Keys.Upsert(key);
 
