@@ -11,6 +11,7 @@
     input[type=text],
     input[type=file],
     input[type=number],
+    input[type=password],
     select,
     textarea {
         @apply p-1 rounded md:rounded-md lg:rounded-lg bg-white dark:bg-slate-600 dark:disabled:bg-slate-900 border dark:valid:border-none invalid:border-red-300;

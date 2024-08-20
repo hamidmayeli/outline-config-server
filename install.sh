@@ -111,10 +111,10 @@ echo "#!/bin/bash
 cd ${CURRENT_PATH}
 
 # Pull the latest version of the Docker image
-docker-compose pull
+docker compose pull
 
 # Recreate containers with the new image (if there's an update) and remove old containers
-docker-compose up -d --remove-orphans
+docker compose up -d --remove-orphans
 
 # Optionally, remove unused images to free up space
 docker image prune -f

@@ -9,6 +9,12 @@ export default function Server() {
     const [serverInfo, setServerInfo] = useState<IServerInfo | undefined>();
     const [keys, setKeys] = useState<IAccessKeyResponse[]>([]);
 
+    const compare = (a: IAccessKeyResponse, b: IAccessKeyResponse) => {
+        if (a.name < b.name) return -1;
+        if (a.name > b.name) return 1;
+        return 0;
+      };
+    
     useEffect(() => {
         baseApi.getApi<IServerInfo>(`/v1/server/${serverId}`)
             .then(res => {
@@ -18,8 +24,10 @@ export default function Server() {
 
         baseApi.getApi<IAccessKeyResponse[]>(`/v1/server/${serverId}/keys`)
             .then(keys => {
-                if (keys)
+                if (keys){
+                    keys.sort(compare)
                     setKeys(keys);
+                }
             })
             .catch(err => console.error(err));
     }, [serverId]);
