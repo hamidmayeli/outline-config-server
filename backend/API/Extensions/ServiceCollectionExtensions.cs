@@ -31,6 +31,7 @@ public static class ServiceCollectionExtensions
             .AddTransient<IOutlineServerClientFactory, OutlineServerClientFactory>()
             .AddTransient<IDateTimeService, DateTimeService>()
             .AddTransient<IUserService, UserService>()
-            .AddTransient<IServerService, ServerService>();
+            .AddTransient<IServerService, ServerService>()
+            .AddHttpContextAccessor();
     }
 }

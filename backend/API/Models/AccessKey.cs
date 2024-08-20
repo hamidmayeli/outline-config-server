@@ -7,6 +7,8 @@ public record AccessKeyResponse
     public string AccessUrl { get; }
     public DataLimit DataLimit { get; }
 
+    public string LocalAccessUrl { get; set; } = string.Empty;
+
     public AccessKeyResponse
     (
         string id,
