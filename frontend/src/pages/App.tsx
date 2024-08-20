@@ -22,6 +22,10 @@ function App() {
       </div>
       <h1 className='text-center font-bold text-5xl mb-5'>Outline Manager</h1>
 
+      <Link to="/local-keys">
+        <div className="boxed-area mb-5">Local Keys</div>
+      </Link>
+
       {servers.map(server => (
         <Link to={`/server/${server.id}`}>
           <div key={server.id} className="boxed-area mb-5">

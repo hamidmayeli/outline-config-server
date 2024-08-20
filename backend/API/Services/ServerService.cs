@@ -10,19 +10,16 @@ public interface IServerService
     Task<ServerInfo> Get(int userId, Guid serverId);
     Task<IEnumerable<AccessKeyResponse>> GetAccessKeys(int userId, Guid serverId);
     Task<IEnumerable<ServerDto>> GetAll(int userId);
-    Task<string?> GetAccessKeyFromLocal(Guid serverId, Guid keyId);
 }
 
 public class ServerService(
     ILiteDatabase _database,
     ILogger<ServerService> _logger,
-    IOutlineServerClientFactory _outlineClientFactory,
-    IHttpContextAccessor _httpContextAccessor
+    IOutlineServerClientFactory _outlineClientFactory
     ) : IServerService
 {
     private ILiteCollection<UserModel> Users => _database.GetCollection<UserModel>();
-
-    private ILiteCollection<ServerLocalKeys> LocalKeys => _database.GetCollection<ServerLocalKeys>();
+    private ILiteCollection<LocalKey> LocalKeys => _database.GetCollection<LocalKey>();
 
     public async Task<ServerInfo> Add(int userId, NewServerDto newServer)
     {
@@ -62,38 +59,20 @@ public class ServerService(
     {
         var server = FindServerLocally(userId, serverId);
 
-        var accessKeyCollection = await LoagRemoteAccessKeys(server);
+        var accessKeyCollection = await LoadRemoteKeys(server);
 
-        var request = _httpContextAccessor.HttpContext?.Request;
+        var localConfigs = LocalKeys.FindAll().ToDictionary(x => x.AccessKey, x => x.ConfigUrl);
 
-        var localKeys = _database.GetCollection<ServerLocalKeys>().FindById(serverId)
-            ?? new () { ServerId = serverId };
-
-        var newKeys = new List<LocalAccessKey>();
-
-        foreach (var accessKey in accessKeyCollection.AccessKeys)
+        foreach (var item in accessKeyCollection.AccessKeys)
         {
-            var localKey = localKeys.LocalAccessKeys.FirstOrDefault(x => x.RemoteId == accessKey.Id);
-
-            if (localKey == null)
-            {
-                localKey = new LocalAccessKey(Guid.NewGuid(), accessKey.Id, accessKey.AccessUrl);
-                newKeys.Add(localKey);
-            }
-
-            accessKey.LocalAccessUrl = $"ssconf://{request?.Host}/api/v1/config/{serverId}/{localKey.LocalId}";
-        }
-
-        if(newKeys.Count != 0)
-        {
-            localKeys.LocalAccessKeys.AddRange(newKeys);
-            LocalKeys.Upsert(localKeys);
+            if (localConfigs.TryGetValue(item.AccessUrl, out var configUrl))
+                item.ConfigUrl = configUrl;
         }
 
         return accessKeyCollection.AccessKeys;
     }
 
-    private async Task<AccessKeyCollectionResponse> LoagRemoteAccessKeys(ServerModel server)
+    private async Task<AccessKeyCollectionResponse> LoadRemoteKeys(ServerModel server)
     {
         var client = _outlineClientFactory.Create(server.ApiUrl);
 
@@ -110,15 +89,6 @@ public class ServerService(
 
     public Task<IEnumerable<ServerDto>> GetAll(int userId)
         => Task.FromResult(GetUser(userId).Servers.Select(x => new ServerDto(x.ServerId, x.Name)));
-
-    public Task<string?> GetAccessKeyFromLocal(Guid serverId, Guid keyId)
-    {
-        var keys = LocalKeys.FindById(serverId) ?? new ();
-
-        var key = keys.LocalAccessKeys.FirstOrDefault(x => x.LocalId == keyId);
-
-        return Task.FromResult(key?.AccessUrl);
-    }
 
     private ServerModel FindServerLocally(int userId, Guid serverId)
     {

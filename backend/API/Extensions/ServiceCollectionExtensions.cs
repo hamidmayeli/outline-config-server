@@ -32,6 +32,7 @@ public static class ServiceCollectionExtensions
             .AddTransient<IDateTimeService, DateTimeService>()
             .AddTransient<IUserService, UserService>()
             .AddTransient<IServerService, ServerService>()
+            .AddTransient<ILocalKeyService, LocalKeyService>()
             .AddHttpContextAccessor();
     }
 }
