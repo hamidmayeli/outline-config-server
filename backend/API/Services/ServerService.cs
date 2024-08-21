@@ -1,4 +1,5 @@
 ﻿using API.Dtos.Server;
+using API.Extensions;
 using API.Models;
 using LiteDB;
 
@@ -7,6 +8,7 @@ namespace API.Services;
 public interface IServerService
 {
     Task<ServerInfo> Add(int userId, NewServerDto newServer);
+    Task Delete(int userId, Guid id);
     Task<ServerInfo> Get(int userId, Guid serverId);
     Task<IEnumerable<AccessKeyResponse>> GetAccessKeys(int userId, Guid serverId);
     Task<IEnumerable<ServerDto>> GetAll(int userId);
@@ -48,20 +50,41 @@ public class ServerService(
         return response!;
     }
 
+    public Task Delete(int userId, Guid id)
+    {
+        var user = _database.GetUser(userId);
+
+        var server = user.Servers.FirstOrDefault(x => x.ServerId == id);
+
+        if( server != null)
+        {
+            user.Servers.Remove(server);
+            Users.Update(user);
+        }
+
+        return Task.CompletedTask;
+    }
+
     public Task<ServerInfo> Get(int userId, Guid serverId)
     {
-        var server = FindServerLocally(userId, serverId);
+        var server = _database.FindServerLocally(userId, serverId);
 
         return GetServerInfo(server)!;
     }
 
     public async Task<IEnumerable<AccessKeyResponse>> GetAccessKeys(int userId, Guid serverId)
     {
-        var server = FindServerLocally(userId, serverId);
+        var server = _database.FindServerLocally(userId, serverId);
 
         var accessKeyCollection = await LoadRemoteKeys(server);
 
-        var localConfigs = LocalKeys.FindAll().ToDictionary(x => x.AccessKey, x => x.ConfigUrl);
+        static string removeHash(string input)
+        {
+            int hashIndex = input.IndexOf('#');
+            return hashIndex >= 0 ? input[..hashIndex] : input;
+        }
+
+        var localConfigs = LocalKeys.FindAll().ToDictionary(x => removeHash(x.AccessKey), x => x.ConfigUrl);
 
         foreach (var item in accessKeyCollection.AccessKeys)
         {
@@ -88,35 +111,7 @@ public class ServerService(
     }
 
     public Task<IEnumerable<ServerDto>> GetAll(int userId)
-        => Task.FromResult(GetUser(userId).Servers.Select(x => new ServerDto(x.ServerId, x.Name)));
-
-    private ServerModel FindServerLocally(int userId, Guid serverId)
-    {
-        var user = GetUser(userId);
-
-        var server = user.Servers.FirstOrDefault(x => x.ServerId == serverId);
-
-        if (server == null)
-        {
-            _logger.LogError("Server does not exist. ({serverId})", serverId);
-            throw new Exception("Server does not exist.");
-        }
-
-        return server;
-    }
-
-    private UserModel GetUser(int userId)
-    {
-        var user = Users.FindById(userId);
-
-        if (user == null)
-        {
-            _logger.LogError("User does not exist. ({userId})", userId);
-            throw new Exception("User does not exist.");
-        }
-
-        return user;
-    }
+        => Task.FromResult(_database.GetUser(userId).Servers.Select(x => new ServerDto(x.ServerId, x.Name)));
 
     private async Task<ServerInfo?> GetServerInfo(ServerModel server)
     {

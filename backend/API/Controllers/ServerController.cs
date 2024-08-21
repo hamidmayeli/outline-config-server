@@ -26,6 +26,14 @@ public class ServerController(
         return TypedResults.Ok(result);
     }
 
+    [HttpDelete("{id}")]
+    public async Task<NoContent> Delete(Guid id)
+    {
+        await _serverService.Delete(UserId, id);
+
+        return TypedResults.NoContent();
+    }
+
     [HttpGet("{id}/keys")]
     public async Task<Ok<IEnumerable<AccessKeyResponse>>> GetKeys(Guid id)
     {
