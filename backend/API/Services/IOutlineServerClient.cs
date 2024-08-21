@@ -13,4 +13,7 @@ public interface IOutlineServerClient
 
     [Get("/{apiPrefix}/metrics/transfer")]
     Task<UsageResponse> GetUsage(string apiPrefix);
+
+    [Post("/{apiPrefix}/access-keys")]
+    Task<AccessKeyResponse> CreateKey(string apiPrefix, NewKeyRequest request);
 }

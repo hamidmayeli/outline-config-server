@@ -1,4 +1,5 @@
 import { baseApi } from "apis/baseApi";
+import { TextInput } from "components/textInput";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toHumanReadableBytes } from "tools/misc";
@@ -8,6 +9,35 @@ export default function Server() {
 
     const [serverInfo, setServerInfo] = useState<IServerInfo | undefined>();
     const [keys, setKeys] = useState<IAccessKeyResponse[]>([]);
+    const [formData, setFormData] = useState<{ name?: string, limit: number }>({ limit: 0 });
+
+    const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = evt.target;
+
+        // save field values
+        setFormData({
+            ...formData,
+            [name]: value,
+        });
+    };
+
+    const save = async () => {
+        if (formData) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const response = await baseApi.postApi<any, IAccessKeyResponse>(`/v1/key/${serverId}`, {
+                name: formData.name,
+                limit: {
+                    bytes: formData.limit * 1000000000,
+                }
+            });
+
+            if (response) {
+                const list = [...keys, response];
+                list.sort(compare);
+                setKeys(list);
+            }
+        }
+    };
 
     const compare = (a: IAccessKeyResponse, b: IAccessKeyResponse) => {
         if (a.name < b.name) return -1;
@@ -54,6 +84,7 @@ export default function Server() {
                     <div className="boxed-area text-center grow">{getTotalUsage()}</div>
                     <div className="boxed-area text-center grow">{keys.length} Keys</div>
                 </div>
+
                 {keys.map(key => (<div key={key.id} className="flex boxed-area mb-2 items-center">
                     <div className="w-1/3">{key.name}</div>
                     <div className="flex-grow">
@@ -72,6 +103,39 @@ export default function Server() {
                         ) : null}
                     </div>
                 </div>))}
+
+                <div className="boxed-area mb-2 items-center">
+                    <div className="flex gap-1">
+                        <div className="w-1/3">
+                            <TextInput
+                                className="w-full"
+                                id="name"
+                                name="name"
+                                type="text"
+                                placeholder="Name"
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        <div className="grow flex items-center">
+                            <TextInput
+                                className="w-full"
+                                id="accessKey"
+                                name="accessKey"
+                                type="number"
+                                placeholder="Limit"
+                                onChange={handleChange}
+                                required
+                            />
+                            <span className="-ms-7">GB</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <button className="btn w-20" onClick={save}>
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </>
         );
     else
