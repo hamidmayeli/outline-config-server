@@ -61,7 +61,13 @@ public class ServerService(
 
         var accessKeyCollection = await LoadRemoteKeys(server);
 
-        var localConfigs = LocalKeys.FindAll().ToDictionary(x => x.AccessKey, x => x.ConfigUrl);
+        static string removeHash(string input)
+        {
+            int hashIndex = input.IndexOf('#');
+            return hashIndex >= 0 ? input[..hashIndex] : input;
+        }
+
+        var localConfigs = LocalKeys.FindAll().ToDictionary(x => removeHash(x.AccessKey), x => x.ConfigUrl);
 
         foreach (var item in accessKeyCollection.AccessKeys)
         {
