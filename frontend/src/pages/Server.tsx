@@ -38,10 +38,22 @@ export default function Server() {
             .catch(() => { });
     };
 
+    const getTotalUsage = () => {
+        let result = 0;
+
+        keys.map(key => result += key.dataLimit.consumed);
+
+        return toHumanReadableBytes(result);
+    };
+
     if (serverInfo)
         return (
             <>
                 <h1 className="text-2xl text-center mb-5">{serverInfo.name}</h1>
+                <div className="flex gap-1">
+                    <div className="boxed-area text-center">{getTotalUsage()}</div>
+                    <div className="boxed-area text-center">{keys.length} Keys</div>
+                </div>
                 {keys.map(key => (<div key={key.id} className="flex boxed-area mb-2 items-center">
                     <div className="w-1/3">{key.name}</div>
                     <div className="flex-grow">
@@ -49,7 +61,7 @@ export default function Server() {
                     </div>
                     <div className="flex flex-col gap-1">
                         <button className="btn"
-                            onClick={() => copyToClipboard(key.accessUrl + '#' + key.name)}>
+                            onClick={() => copyToClipboard(`${key.accessUrl}#${encodeURIComponent(key.name + " - " + serverInfo.name)}`)}>
                             Copy
                         </button>
                         {key.configUrl ? (
