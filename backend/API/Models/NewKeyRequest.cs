@@ -1,3 +1,7 @@
 ﻿namespace API.Models;
 
-public record NewKeyRequest(string Name, DataLimit? Limit);
+public record NewKeyRequest
+{
+    public string Name { get; init; }
+    public DataLimit? Limit { get; set; }
+}
