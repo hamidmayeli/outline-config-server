@@ -26,9 +26,7 @@ export default function Server() {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const response = await baseApi.postApi<any, IAccessKeyResponse>(`/v1/key/${serverId}`, {
                 name: formData.name,
-                limit: {
-                    bytes: formData.limit * 1000000000,
-                }
+                limit: formData.limit ? ({ bytes: formData.limit * 1000000000 }) : null,
             });
 
             if (response) {

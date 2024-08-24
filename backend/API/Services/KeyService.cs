@@ -20,8 +20,13 @@ public class KeyService(
         var server = _database.FindServerLocally(userId, serverid);
         var client = _outlineServerClientFactory.Create(server.ApiUrl);
 
+        if (request.Limit?.Bytes <= 1000_000_000)
+        {
+            request.Limit = null;
+        }
+
         var result = await client.CreateKey(server.ApiPrefix, request);
-        result.DataLimit.Bytes = request.Limit.Bytes;
+        result.DataLimit.Bytes = request.Limit?.Bytes;
 
         _logger.LogInformation("A new key is created ({id}).", result.Id);
         return result;

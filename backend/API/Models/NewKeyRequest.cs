@@ -1,3 +1,3 @@
 ﻿namespace API.Models;
 
-public record NewKeyRequest(string Name, DataLimit Limit);
+public record NewKeyRequest(string Name, DataLimit? Limit);
