@@ -1,6 +1,7 @@
 ﻿using API.Models;
 using API.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +20,7 @@ public class ConfigController(
     }
 
     [HttpGet]
+    [EnableCors("Public")]
     public async Task<Ok<IEnumerable<LocalKey>>> GetAll()
     {
         var result = await _localKeyService.GetAll();

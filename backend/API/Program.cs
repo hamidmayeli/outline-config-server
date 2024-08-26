@@ -96,9 +96,9 @@ builder.Services
 builder.Services.Configure<AuthenticationSettings>(
     options => builder.Configuration.GetSection("Authentication").Bind(options));
 
-#if DEBUG
 builder.Services.AddCors(options =>
 {
+#if DEBUG
     options.AddPolicy("AllowSpecificOrigin",
         policy =>
         {
@@ -106,8 +106,14 @@ builder.Services.AddCors(options =>
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
-});
 #endif
+    options.AddPolicy("Public",
+        policy =>
+        {
+            policy.WithOrigins("https://www.etemadify.com")
+                .WithMethods("GET");
+        });
+});
 
 var app = builder.Build();
 
@@ -122,9 +128,11 @@ else
 {
     app.UseDefaultFiles();
     app.UseStaticFiles();
+    
 }
 
 app.UseHttpsRedirection();
+app.UseCors("Public");
 
 app
     .UseAuthentication()
