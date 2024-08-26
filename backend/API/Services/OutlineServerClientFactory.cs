@@ -1,4 +1,5 @@
 ﻿using Refit;
+using System.Text.Json;
 
 namespace API.Services;
 
@@ -22,6 +23,14 @@ public class OutlineServerClientFactory : IOutlineServerClientFactory
         return RestService.For<IOutlineServerClient>(new HttpClient(handler)
         {
             BaseAddress = new Uri($"{uri.Scheme}://{uri.Host}:{uri.Port}"),
+        }, 
+        new RefitSettings
+        {
+            ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            })
         });
     }
 }

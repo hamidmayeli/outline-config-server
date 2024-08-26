@@ -2,6 +2,9 @@
 
 public record NewKeyRequest
 {
-    public string Name { get; init; }
+    public required string Name { get; init; }
+
     public DataLimit? Limit { get; set; }
+
+    public string Method { get; } = "aes-192-gcm";
 }

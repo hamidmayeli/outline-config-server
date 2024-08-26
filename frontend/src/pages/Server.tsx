@@ -23,6 +23,9 @@ export default function Server() {
 
     const save = async () => {
         if (formData) {
+            console.log({
+                formData,
+            })
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const response = await baseApi.postApi<any, IAccessKeyResponse>(`/v1/key/${serverId}`, {
                 name: formData.name,
@@ -118,8 +121,8 @@ export default function Server() {
                         <div className="grow flex items-center">
                             <TextInput
                                 className="w-full"
-                                id="accessKey"
-                                name="accessKey"
+                                id="limit"
+                                name="limit"
                                 type="number"
                                 placeholder="Limit"
                                 onChange={handleChange}
