@@ -83,19 +83,23 @@ public class UserService(
         var tokenHandler = new JwtSecurityTokenHandler();
         var tokenObject = tokenHandler.CreateToken(tokenDescriptor);
 
-        _logger.LogDebug("A new access token generated for {userId}", user.Id);
+        _logger.LogDebug("A new access token generated for {userId}. TTL {timeout}", user.Id, _authenticationSettings.Value.AccessTokenTimeOut);
 
         return Task.FromResult(tokenHandler.WriteToken(tokenObject));
     }
 
     public Task<RefreshTokenModel> GenerateRefreshToken(UserModel user)
     {
+        var expiry = _dateTimeService.UtcNow.AddDays(_authenticationSettings.Value.TimeOutInDays);
+
         var token = new RefreshTokenModel
         {
             Token = Guid.NewGuid().ToString().ToLower(),
             UserId = user.Id,
-            Expiry = _dateTimeService.UtcNow.AddDays(_authenticationSettings.Value.TimeOutInDays)
+            Expiry = expiry
         };
+
+        _logger.LogDebug("Create a refresh token for user {user} valid until {expiry}.", user.Username, expiry);
 
         RefreshTokens.Insert(token);
 
@@ -121,15 +125,21 @@ public class UserService(
 
     public Task<(UserModel?, RefreshTokenModel?)> Validate(string id)
     {
+        _logger.LogTrace("Validating token {id}.", id);
+
         var token = RefreshTokens.FindById(id);
 
         if(token == null || token.Expiry <= _dateTimeService.UtcNow)
             return Task.FromResult<(UserModel?, RefreshTokenModel?)>((null, null));
 
+        _logger.LogTrace("Found token {id}.", id);
+
         var user = Users.FindById(token.UserId);
 
         if(user == null)
             return Task.FromResult<(UserModel?, RefreshTokenModel?)>((null, null));
+
+        _logger.LogTrace("Found user for token {id}.", id);
 
         return Task.FromResult<(UserModel?, RefreshTokenModel?)>((user, token));
     }

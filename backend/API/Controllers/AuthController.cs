@@ -8,7 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers;
 
 public class AuthController(
-    IUserService _userService
+    IUserService _userService,
+    ILogger<AuthController> _logger
     ) : ApiController
 {
     internal const string RefreshTokenCookieKey = "RefreshToken";
@@ -17,6 +18,8 @@ public class AuthController(
     [AllowAnonymous]
     public async Task<Results<NoContent, Ok<SuccessLoginDto>>> Login([FromBody] LoginInfoDto loginInfo)
     {
+        _logger.LogTrace("Login user {user}.", loginInfo.Username);
+
         var user = await _userService.HasAnyUser() 
             ? await _userService.Get(loginInfo.Username, loginInfo.Password)
             : await _userService.Create(loginInfo.Username, loginInfo.Password);
@@ -37,6 +40,8 @@ public class AuthController(
     {
         var token = Request.Cookies[RefreshTokenCookieKey];
 
+        _logger.LogDebug("Trying to refresh access token with '{token}' refresh token.", token);
+
         if (string.IsNullOrWhiteSpace(token))
             return TypedResults.Forbid();
 
@@ -44,6 +49,8 @@ public class AuthController(
 
         if (user is null || refreshToken is null)
             return TypedResults.Forbid();
+
+        _logger.LogDebug("Access token is renewed for '{token}' refresh token.", token);
 
         return TypedResults.Ok(await CreateCookieAndDto(user, refreshToken));
     }

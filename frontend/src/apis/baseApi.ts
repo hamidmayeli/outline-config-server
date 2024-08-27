@@ -132,7 +132,7 @@ class BaseAPI {
 
     private async refreshToken() {
         const request = new Request(
-            this.toAbsolute("/v1/user/refreshToken"),
+            this.toAbsolute("/v1/auth/refreshToken"),
             {
                 method: "GET",
                 mode: "cors",

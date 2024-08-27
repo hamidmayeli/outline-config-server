@@ -13,8 +13,11 @@ services:
 
   api:
     extends:
-      file: docker-compose.yaml
+      file: docker-compose.yml
       service: api
+    environment:
+      - AUTHENTICATION__ACCESSTOKENTIMEOUT=1
+      - LOGGING__LOGLEVEL__DEFAULT=Trace
     depends_on:
       generate-ssl:
         condition: service_completed_successfully
