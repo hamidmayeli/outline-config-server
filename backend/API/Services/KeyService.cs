@@ -20,7 +20,7 @@ public class KeyService(
         var server = _database.FindServerLocally(userId, serverid);
         var client = _outlineServerClientFactory.Create(server.ApiUrl);
 
-        if (request.Limit?.Bytes <= 1000_000_000)
+        if (request.Limit?.Bytes < 1000_000_000)
         {
             request.Limit = null;
         }
