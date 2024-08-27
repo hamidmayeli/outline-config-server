@@ -7,6 +7,9 @@ import { toHumanReadableBytes } from "tools/misc";
 export default function Server() {
     const { serverId } = useParams();
 
+    const [deleteConfirmed, setDeleteConfirmed] = useState<string[]>([]);
+    const [lastLoaded, setLastLoaded] = useState(Date.now);
+    const [updatingKeyId, setUpdatingKeyId] = useState<string | undefined>();
     const [serverInfo, setServerInfo] = useState<IServerInfo | undefined>();
     const [keys, setKeys] = useState<IAccessKeyResponse[]>([]);
     const [formData, setFormData] = useState<{ name?: string, limit: number }>({ limit: 0 });
@@ -21,7 +24,13 @@ export default function Server() {
         });
     };
 
-    const save = async () => {
+    const save = () => {
+        const promise = updatingKeyId ? update() : create();
+
+        promise.then(() => alert("Saved")).catch(err => console.error(err));
+    };
+
+    const create = async () => {
         if (formData) {
             console.log({
                 formData,
@@ -38,7 +47,22 @@ export default function Server() {
                 setKeys(list);
             }
         }
-    };
+    }
+
+    const update = async () => {
+        if (formData) {
+            console.log({
+                formData,
+            })
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await baseApi.putApi<any, IAccessKeyResponse>(`/v1/key/${serverId}/${updatingKeyId}`, {
+                name: formData.name,
+                limit: formData.limit ? ({ bytes: formData.limit * 1000000000 }) : null,
+            });
+
+            setLastLoaded(Date.now);
+        }
+    }
 
     const compare = (a: IAccessKeyResponse, b: IAccessKeyResponse) => {
         if (a.name < b.name) return -1;
@@ -61,7 +85,7 @@ export default function Server() {
                 }
             })
             .catch(err => console.error(err));
-    }, [serverId]);
+    }, [serverId, lastLoaded]);
 
     const copyToClipboard = (accessUrl: string) => {
         navigator.clipboard.writeText(accessUrl)
@@ -77,6 +101,24 @@ export default function Server() {
         return toHumanReadableBytes(result);
     };
 
+    const getUpdatingKeyName = () => {
+        const key = keys.find(x => x.id === updatingKeyId);
+
+        return key?.name ?? "ERROR";
+    };
+
+    const deleteKey = (id: string) => {
+        if (deleteConfirmed.indexOf(id) >= 0) {
+            baseApi.deleteApi(`/v1/key/${serverId}/${id}`)
+              .then(() => {
+                setKeys(keys.filter(x => x.id !== id));
+              })
+              .catch(err => console.error(err));
+          } else {
+            setDeleteConfirmed([...deleteConfirmed, id]);
+          }
+    };
+
     if (serverInfo)
         return (
             <>
@@ -87,7 +129,7 @@ export default function Server() {
                 </div>
 
                 {keys.map(key => (<div key={key.id} className="flex boxed-area mb-2 items-center">
-                    <div className="w-1/3">{key.name}</div>
+                    <div className="w-1/3" onClick={() => setUpdatingKeyId(key.id)}>{key.name}</div>
                     <div className="flex-grow">
                         <span>{toHumanReadableBytes(key.dataLimit.consumed)}</span>{key.dataLimit.bytes ? (<span> / {toHumanReadableBytes(key.dataLimit.bytes)}</span>) : null}
                     </div>
@@ -95,6 +137,10 @@ export default function Server() {
                         <button className="btn w-20"
                             onClick={() => copyToClipboard(`${key.accessUrl}#${encodeURIComponent(key.name + " - " + serverInfo.name)}`)}>
                             Url
+                        </button>
+                        <button className="btn w-20"
+                            onClick={() => deleteKey(key.id)}>
+                            {deleteConfirmed.indexOf(key.id) >= 0 ? "Delete" : "X"}
                         </button>
                         {key.configUrl ? (
                             <button className="btn w-20"
@@ -106,6 +152,7 @@ export default function Server() {
                 </div>))}
 
                 <div className="boxed-area mb-2 items-center">
+                    <p>Add or update keys: {updatingKeyId ? `(Updating "${getUpdatingKeyName()}")` : "(Adding a new key)"}</p>
                     <div className="flex gap-1">
                         <div className="w-1/3">
                             <TextInput

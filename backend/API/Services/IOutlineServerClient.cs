@@ -15,5 +15,17 @@ public interface IOutlineServerClient
     Task<UsageResponse> GetUsage(string apiPrefix);
 
     [Post("/{apiPrefix}/access-keys")]
-    Task<AccessKeyResponse> CreateKey(string apiPrefix, NewKeyRequest request);
+    Task<AccessKeyResponse> CreateKey(string apiPrefix, KeyRequest request);
+
+    [Delete("/{apiPrefix}/access-keys/{keyId}")]
+    Task DeleteAccessKey(string apiPrefix, string keyId);
+
+    [Put("/{apiPrefix}/access-keys/{keyId}/data-limit")]
+    Task SetLimit(string apiPrefix, string keyId, SetKeyLimitRequest request);
+
+    [Delete("/{apiPrefix}/access-keys/{keyId}/data-limit")]
+    Task RemoveLimit(string apiPrefix, string keyId);
+
+    [Put("/{apiPrefix}/access-keys/{keyId}/name")]
+    Task SetName(string apiPrefix, string keyId, SetKeyNameRequest request);
 }

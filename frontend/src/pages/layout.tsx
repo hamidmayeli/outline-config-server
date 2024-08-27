@@ -33,8 +33,7 @@ export default function RootLayout() {
                     />
                     <div className={`max-w-5xl p-1 md:p-2 mx-auto
                           min-h-[calc(100vh-theme(space.14))]
-                          text-slate-800 dark:text-slate-200
-                          h-14`}>
+                          text-slate-800 dark:text-slate-200`}>
                         <Outlet />
                     </div>
                 </div>
