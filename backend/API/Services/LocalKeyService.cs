@@ -1,5 +1,6 @@
 ﻿using API.Models;
 using LiteDB;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 
 namespace API.Services;
 
@@ -8,6 +9,7 @@ public interface ILocalKeyService
     Task<string?> GetAccessKey(Guid id);
     Task<IEnumerable<LocalKey>> GetAll();
     Task Upsert(LocalKey key);
+    Task Delete(Guid keyId);
 }
 
 public class LocalKeyService(
@@ -36,4 +38,12 @@ public class LocalKeyService(
 
     public Task<string?> GetAccessKey(Guid id)
         => Task.FromResult(Keys.FindById(id)?.AccessKey);
+
+    public Task Delete(Guid keyId)
+    {
+        Keys.DeleteMany(x => x.Id == keyId);
+        _logger.LogInformation("Local key deleted {key}", keyId);
+
+        return Task.CompletedTask;
+    }
 }

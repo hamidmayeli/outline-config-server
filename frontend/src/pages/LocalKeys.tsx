@@ -7,6 +7,7 @@ export default function Server() {
     const [keys, setKeys] = useState<ILocalKey[]>([]);
     const [lastLoaded, setLastLoaded] = useState(Date.now);
     const [formData, setFormData] = useState<{ name?: string, accessKey?: string, id?: string, configUrl: string }>({ configUrl: "" });
+    const [deleteConfirmed, setDeleteConfirmed] = useState<string[]>([]);
 
     const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = evt.target;
@@ -73,6 +74,18 @@ export default function Server() {
         setFormData(key);
     };
 
+    const deleteKey = (id: string) => {
+        if (deleteConfirmed.indexOf(id) >= 0) {
+            baseApi.deleteApi(`/v1/config/${id}`)
+              .then(() => {
+                setKeys(keys.filter(x => x.id !== id));
+              })
+              .catch(err => console.error(err));
+          } else {
+            setDeleteConfirmed([...deleteConfirmed, id]);
+          }
+    };
+
     if (!loading)
         return (
             <>
@@ -86,6 +99,10 @@ export default function Server() {
                         <button className="btn"
                             onClick={() => copyToClipboard(key.configUrl)}>
                             Copy
+                        </button>
+                        <button className="btn w-20"
+                            onClick={() => deleteKey(key.id)}>
+                            {deleteConfirmed.indexOf(key.id) >= 0 ? "Delete" : "X"}
                         </button>
                     </div>
                 </div>))}

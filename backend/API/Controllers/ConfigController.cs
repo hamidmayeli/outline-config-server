@@ -33,4 +33,11 @@ public class ConfigController(
         await _localKeyService.Upsert(key);
         return TypedResults.NoContent();
     }
+
+    [HttpDelete("{keyId}")]
+    public async Task<NoContent> Delete(Guid keyId)
+    {
+        await _localKeyService.Delete(keyId);
+        return TypedResults.NoContent();
+    }
 }
