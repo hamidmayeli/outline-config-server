@@ -1,6 +1,7 @@
 ﻿using API.Models;
 using API.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,6 +13,7 @@ public class ConfigController(
 {
     [HttpGet("{keyId}")]
     [AllowAnonymous]
+    [EnableCors("AllowAllPolicy")]
     public async Task<string?> Translate(Guid keyId)
     {
         var result = await _localKeyService.GetAccessKey(keyId);

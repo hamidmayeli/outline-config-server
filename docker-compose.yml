@@ -12,6 +12,7 @@ services:
     environment:
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/ssl/the.pem
       - ASPNETCORE_Kestrel__Certificates__Default__KeyPath=/ssl/the.key
+      - ALLOWEDHOSTS=${DOMAIN}
     ports:
       - 80:80
       - 443:443

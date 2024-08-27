@@ -96,18 +96,33 @@ builder.Services
 builder.Services.Configure<AuthenticationSettings>(
     options => builder.Configuration.GetSection("Authentication").Bind(options));
 
-#if DEBUG
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOrigin",
+    options.AddPolicy("AllowAllPolicy",
         policy =>
         {
             policy.AllowAnyOrigin()
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
+
+    if( builder.Environment.IsDevelopment())
+        options.AddDefaultPolicy(policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+    else
+        options.AddDefaultPolicy(policy =>
+        {
+            var origins = builder.Configuration.GetValue("ALLOWEDHOSTS", "*")!;
+
+            policy.WithOrigins(origins.Split(","))
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
 });
-#endif
 
 var app = builder.Build();
 
@@ -116,7 +131,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseCors("AllowSpecificOrigin");
 }
 else
 {
@@ -125,6 +139,8 @@ else
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors();
 
 app
     .UseAuthentication()
