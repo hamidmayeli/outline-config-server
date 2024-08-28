@@ -9,8 +9,7 @@ public static class DatabaseExtensions
     {
         var user = database.GetUser(userId);
 
-        return user.Servers.FirstOrDefault(x => x.ServerId == serverId)
-            ?? throw new Exception($"Server does not exist. ({serverId})");
+        return user.GetServer(serverId);
     }
 
     public static UserModel GetUser(this ILiteDatabase database, int userId)

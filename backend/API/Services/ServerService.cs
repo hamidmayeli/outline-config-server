@@ -116,11 +116,16 @@ public class ServerService(
 
     public async Task UpdateName(int userId, Guid id, string name)
     {
-        var server = _database.FindServerLocally(userId, id);
+        var user = _database.GetUser(userId);
+
+        var server = user.GetServer(id);
 
         var client = _outlineClientFactory.Create(server.ApiUrl);
 
         await client.SetServerName(server.ApiPrefix, new(name));
+
+        server.Name = name;
+        Users.Update(user);
     }
 
     private async Task<ServerInfo?> GetServerInfo(ServerModel server)
