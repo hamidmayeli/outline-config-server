@@ -61,6 +61,8 @@ export default function Server() {
             });
 
             setLastLoaded(Date.now);
+            setFormData({limit: 0});
+            setUpdatingKeyId(undefined);
         }
     }
 
