@@ -12,6 +12,7 @@ public interface IServerService
     Task<ServerInfo> Get(int userId, Guid serverId);
     Task<IEnumerable<AccessKeyResponse>> GetAccessKeys(int userId, Guid serverId);
     Task<IEnumerable<ServerDto>> GetAll(int userId);
+    Task UpdateName(int userId, Guid id, string name);
 }
 
 public class ServerService(
@@ -56,7 +57,7 @@ public class ServerService(
 
         var server = user.Servers.FirstOrDefault(x => x.ServerId == id);
 
-        if( server != null)
+        if (server != null)
         {
             user.Servers.Remove(server);
             Users.Update(user);
@@ -112,6 +113,15 @@ public class ServerService(
 
     public Task<IEnumerable<ServerDto>> GetAll(int userId)
         => Task.FromResult(_database.GetUser(userId).Servers.Select(x => new ServerDto(x.ServerId, x.Name)));
+
+    public async Task UpdateName(int userId, Guid id, string name)
+    {
+        var server = _database.FindServerLocally(userId, id);
+
+        var client = _outlineClientFactory.Create(server.ApiUrl);
+
+        await client.SetServerName(server.ApiPrefix, new(name));
+    }
 
     private async Task<ServerInfo?> GetServerInfo(ServerModel server)
     {

@@ -49,4 +49,12 @@ public class ServerController(
 
         return TypedResults.Ok(result);
     }
+
+    [HttpPut("{id}/name")]
+    public async Task<NoContent> SetName(Guid id, SetNameRequest request)
+    {
+        await _serverService.UpdateName(UserId, id, request.Name);
+
+        return TypedResults.NoContent();
+    }
 }

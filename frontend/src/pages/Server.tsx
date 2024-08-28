@@ -1,4 +1,5 @@
 import { baseApi } from "apis/baseApi";
+import { ServerName } from "components/serverName";
 import { TextInput } from "components/textInput";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -124,7 +125,7 @@ export default function Server() {
     if (serverInfo)
         return (
             <>
-                <h1 className="text-2xl text-center mb-5">{serverInfo.name}</h1>
+                <ServerName serverInfo={serverInfo} />
                 <div className="flex gap-5 mb-5">
                     <div className="boxed-area text-center grow">{getTotalUsage()}</div>
                     <div className="boxed-area text-center grow">{keys.length} Keys</div>

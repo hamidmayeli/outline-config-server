@@ -21,11 +21,15 @@ public interface IOutlineServerClient
     Task DeleteAccessKey(string apiPrefix, string keyId);
 
     [Put("/{apiPrefix}/access-keys/{keyId}/data-limit")]
-    Task SetLimit(string apiPrefix, string keyId, SetKeyLimitRequest request);
+    Task SetLimit(string apiPrefix, string keyId, SetLimitRequest request);
 
     [Delete("/{apiPrefix}/access-keys/{keyId}/data-limit")]
     Task RemoveLimit(string apiPrefix, string keyId);
 
     [Put("/{apiPrefix}/access-keys/{keyId}/name")]
-    Task SetName(string apiPrefix, string keyId, SetKeyNameRequest request);
+    Task SetKeyName(string apiPrefix, string keyId, SetNameRequest request);
+
+    [Put("/{apiPrefix}/name")]
+    Task SetServerName(string apiPrefix, SetNameRequest request);
+
 }

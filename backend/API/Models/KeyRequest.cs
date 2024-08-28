@@ -9,12 +9,6 @@ public record KeyRequest
     public string Method { get; } = "aes-192-gcm";
 }
 
-public record SetKeyLimitRequest
-{
-    public DataLimit? Limit { get; set; }
-}
+public record SetLimitRequest(DataLimit? Limit);
 
-public record SetKeyNameRequest
-{
-    public required string Name { get; init; }
-}
+public record SetNameRequest(string Name);

@@ -50,10 +50,10 @@ public class KeyService(
         var client = _outlineServerClientFactory.Create(server.ApiUrl);
 
         if (request.Limit != null)
-            await client.SetLimit(server.ApiPrefix, keyId, new() { Limit = request.Limit });
+            await client.SetLimit(server.ApiPrefix, keyId, new(request.Limit));
         else
             await client.RemoveLimit(server.ApiPrefix, keyId);
 
-        await client.SetName(server.ApiPrefix, keyId, new() { Name = request.Name });
+        await client.SetKeyName(server.ApiPrefix, keyId, new(request.Name));
     }
 }
