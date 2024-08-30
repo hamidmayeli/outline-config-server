@@ -66,7 +66,7 @@ fi
 # Get certificate
 docker run -d -v ./data/webroot:/usr/share/nginx/html -p 80:80 --name nginx nginx
 
-docker run --name certbot -it --rm \
+docker run --name certbot --rm \
     -v ./data/webroot:/home/webroot \
     -v ./data/ssl:/data/ssl \
     --entrypoint /bin/sh \
