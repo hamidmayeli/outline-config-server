@@ -18,7 +18,9 @@ public interface IServerService
 public class ServerService(
     ILiteDatabase _database,
     ILogger<ServerService> _logger,
-    IOutlineServerClientFactory _outlineClientFactory
+    IOutlineServerClientFactory _outlineClientFactory,
+    IKeyService _keyService,
+    ILocalKeyService _localKeyService
     ) : IServerService
 {
     private ILiteCollection<UserModel> Users => _database.GetCollection<UserModel>();
@@ -36,19 +38,18 @@ public class ServerService(
             throw new Exception("User does not exist.");
         }
 
-        var server = new ServerModel(newServer.ApiUrl);
+        var server = new ServerModel { ApiUrl = newServer.ApiUrl };
 
-        var response = await GetServerInfo(server);
+        var response = await CreateServer(user, server)
+            ?? throw new Exception("Imposible");
 
-        _logger.LogInformation("Server is valid and reachable. {IdFromServer}", response!.ServerId);
+        if (newServer.CopyFrom.HasValue)
+        {
+            var (oldKeys, newKeys) = await CopyKeys(user, newServer.CopyFrom.Value, response.ServerId);
+            await UpdateLocalKeys(oldKeys, newKeys);
+        }
 
-        server.Name = response.Name;
-        server.ServerId = response.ServerId;
-
-        user.Servers.Add(server);
-        Users.Update(user);
-
-        return response!;
+        return response;
     }
 
     public Task Delete(int userId, Guid id)
@@ -133,6 +134,63 @@ public class ServerService(
         var client = _outlineClientFactory.Create(server.ApiUrl);
 
         var response = await client.GetServerInfo(server.ApiPrefix);
+
+        return response;
+    }
+
+    private async Task<(IEnumerable<AccessKeyResponse> oldKeys, List<AccessKeyResponse> newKeys)> CopyKeys(UserModel user, Guid oldServerId, Guid newServerId)
+    {
+        var oldServer = user.Servers.FirstOrDefault(x => x.ServerId == oldServerId);
+
+        if (oldServer == null) 
+            return ([], []);
+
+        var oldKeys = await GetAccessKeys(user.Id, oldServerId);
+
+        var newKeys = await GetAccessKeys(user.Id, newServerId);
+
+        var newKeysList = newKeys.ToList();
+
+        foreach (var oldKey in oldKeys)
+        {
+            if (newKeys.Any(x => x.Name == oldKey.Name))
+                continue;
+
+            var newKey = await _keyService.Create(user.Id, newServerId, new KeyRequest { Name = oldKey.Name, Limit = oldKey.DataLimit });
+
+            newKeysList.Add(newKey);
+        }
+
+        return (oldKeys, newKeysList);
+    }
+
+    private async Task UpdateLocalKeys(IEnumerable<AccessKeyResponse> oldKeys, List<AccessKeyResponse> newKeys)
+    {
+        var localKeys = await _localKeyService.GetAll();
+
+        foreach (var key in localKeys) 
+        {
+            var oldKey = oldKeys.FirstOrDefault(x => key.AccessKey.StartsWith(x.AccessUrl));
+            if (oldKey != null)
+            {
+                key.AccessKey = newKeys.First(x => x.Name == oldKey.Name).AccessUrl;
+
+                await _localKeyService.Upsert(key);
+            }
+        }
+    }
+
+    private async Task<ServerInfo?> CreateServer(UserModel user, ServerModel server)
+    {
+        var response = await GetServerInfo(server);
+
+        _logger.LogInformation("Server is valid and reachable. {IdFromServer}", response!.ServerId);
+
+        server.Name = response.Name;
+        server.ServerId = response.ServerId;
+
+        user.Servers.Add(server);
+        Users.Update(user);
 
         return response;
     }

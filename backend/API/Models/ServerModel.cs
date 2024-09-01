@@ -2,8 +2,10 @@
 
 namespace API.Models;
 
-public record ServerModel(string ApiUrl)
+public record ServerModel
 {
+    public required string ApiUrl { get; set; }
+
     public Guid ServerId { get; set; } = Guid.Empty;
 
     public string Name { get; set; } = "No name";

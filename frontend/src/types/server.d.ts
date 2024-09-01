@@ -23,3 +23,9 @@ interface IAccessKeyResponse {
     };
     configUrl?: string;
 }
+
+interface INewServerDto {
+    apiUrl: string;
+    certSha256: string;
+    copyFrom?: string;
+}
