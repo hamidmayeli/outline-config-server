@@ -119,6 +119,7 @@ export default function Server() {
                                 placeholder="Name"
                                 onChange={handleChange}
                                 required
+                                value={formData.name}
                             />
                         </div>
                         <div className="grow">
@@ -130,6 +131,7 @@ export default function Server() {
                                 placeholder="Access Key"
                                 onChange={handleChange}
                                 required
+                                value={formData.accessKey}
                             />
                         </div>
                         <div className="flex flex-col gap-1">

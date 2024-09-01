@@ -1,7 +1,7 @@
 import { baseApi } from "apis/baseApi";
 import { ServerName } from "components/serverName";
 import { TextInput } from "components/textInput";
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toHumanReadableBytes } from "tools/misc";
 
@@ -46,6 +46,7 @@ export default function Server() {
                 const list = [...keys, response];
                 list.sort(compare);
                 setKeys(list);
+                setFormData({ limit: 0, name: "" });
             }
         }
     }
@@ -61,9 +62,11 @@ export default function Server() {
                 limit: formData.limit ? ({ bytes: formData.limit * 1000000000 }) : null,
             });
 
-            setLastLoaded(Date.now);
-            setFormData({limit: 0});
-            setUpdatingKeyId(undefined);
+            startTransition(() => {
+                setLastLoaded(Date.now);
+                setFormData({ limit: 0, name: "" });
+                setUpdatingKeyId(undefined);
+            });
         }
     }
 
@@ -113,13 +116,23 @@ export default function Server() {
     const deleteKey = (id: string) => {
         if (deleteConfirmed.indexOf(id) >= 0) {
             baseApi.deleteApi(`/v1/key/${serverId}/${id}`)
-              .then(() => {
-                setKeys(keys.filter(x => x.id !== id));
-              })
-              .catch(err => console.error(err));
-          } else {
+                .then(() => {
+                    setKeys(keys.filter(x => x.id !== id));
+                })
+                .catch(err => console.error(err));
+        } else {
             setDeleteConfirmed([...deleteConfirmed, id]);
-          }
+        }
+    };
+
+    const selectForUpdate = (key: IAccessKeyResponse) => {
+        startTransition(() => {
+            setUpdatingKeyId(key.id);
+            setFormData({
+                limit: (key.dataLimit.bytes ?? 0) / 1000000000,
+                name: key.name,
+            });
+        });
     };
 
     if (serverInfo)
@@ -132,7 +145,7 @@ export default function Server() {
                 </div>
 
                 {keys.map(key => (<div key={key.id} className="flex boxed-area mb-2 items-center">
-                    <div className="w-1/3" onClick={() => setUpdatingKeyId(key.id)}>{key.name}</div>
+                    <div className="w-1/3" onClick={() => selectForUpdate(key)}>{key.name}</div>
                     <div className="flex-grow">
                         <span>{toHumanReadableBytes(key.dataLimit.consumed)}</span>{key.dataLimit.bytes ? (<span> / {toHumanReadableBytes(key.dataLimit.bytes)}</span>) : null}
                     </div>
@@ -166,6 +179,7 @@ export default function Server() {
                                 placeholder="Name"
                                 onChange={handleChange}
                                 required
+                                value={formData.name}
                             />
                         </div>
                         <div className="grow flex items-center">
@@ -177,6 +191,7 @@ export default function Server() {
                                 placeholder="Limit"
                                 onChange={handleChange}
                                 required
+                                value={formData.limit}
                             />
                             <span className="-ms-7">GB</span>
                         </div>
