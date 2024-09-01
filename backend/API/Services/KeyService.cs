@@ -1,6 +1,7 @@
 ﻿using API.Extensions;
 using API.Models;
 using LiteDB;
+using Refit;
 
 namespace API.Services;
 
@@ -27,11 +28,27 @@ public class KeyService(
             request.Limit = null;
         }
 
-        var result = await client.CreateKey(server.ApiPrefix, request);
-        result.DataLimit.Bytes = request.Limit?.Bytes;
+        _logger.LogInformation("Creating a new key {name}, {limit}", request.Name, request.Limit);
 
-        _logger.LogInformation("A new key is created ({id}).", result.Id);
-        return result;
+        try
+        {
+            var result = await client.CreateKey(server.ApiPrefix, request);
+            result.DataLimit.Bytes = request.Limit?.Bytes;
+
+            _logger.LogInformation("A new key is created ({id}).", result.Id);
+            return result;
+        }
+        catch (ApiException exception)
+        {
+            var message = $"Message: {{message}}{Environment.NewLine}{Environment.NewLine}Inner Message:{{inner}}";
+
+            _logger.LogError(exception,
+                             message,
+                             exception.Message,
+                             exception.InnerException?.Message);
+
+            throw;
+        }
     }
 
     public async Task Delete(int userId, Guid serverId, string keyId)

@@ -140,6 +140,8 @@ public class ServerService(
 
     private async Task<(IEnumerable<AccessKeyResponse> oldKeys, List<AccessKeyResponse> newKeys)> CopyKeys(UserModel user, Guid oldServerId, Guid newServerId)
     {
+        _logger.LogDebug("Copy keys from '{old}' to '{new}'", oldServerId, newServerId);
+
         var oldServer = user.Servers.FirstOrDefault(x => x.ServerId == oldServerId);
 
         if (oldServer == null) 
@@ -148,6 +150,8 @@ public class ServerService(
         var oldKeys = await GetAccessKeys(user.Id, oldServerId);
 
         var newKeys = await GetAccessKeys(user.Id, newServerId);
+
+        _logger.LogDebug("{old} old keys and {new} new keys loaded", oldKeys.Count(), newKeys.Count());
 
         var newKeysList = newKeys.ToList();
 
@@ -170,10 +174,14 @@ public class ServerService(
 
         foreach (var key in localKeys) 
         {
+            _logger.LogDebug("Updating local key {key}", key.Name);
+
             var oldKey = oldKeys.FirstOrDefault(x => key.AccessKey.StartsWith(x.AccessUrl));
             if (oldKey != null)
             {
                 key.AccessKey = newKeys.First(x => x.Name == oldKey.Name).AccessUrl;
+
+                _logger.LogDebug("Local key ({key}) updated", key.Name);
 
                 await _localKeyService.Upsert(key);
             }
