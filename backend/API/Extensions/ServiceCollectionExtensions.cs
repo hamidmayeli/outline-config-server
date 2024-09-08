@@ -34,6 +34,9 @@ public static class ServiceCollectionExtensions
             .AddTransient<IServerService, ServerService>()
             .AddTransient<ILocalKeyService, LocalKeyService>()
             .AddTransient<IKeyService, KeyService>()
-            .AddHttpContextAccessor();
+            .AddTransient<IUsageLoggerService, UsageLoggerService>()
+            .AddTransient<IReportService, ReportService>()
+            .AddHttpContextAccessor()
+            .AddHostedService<TimedHostedService>();
     }
 }

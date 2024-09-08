@@ -1,6 +1,6 @@
 import "global.css";
 import Header from "components/header";
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import AppContextProvider from "components/appContext";
 import { Spinner } from "components/spinner";
@@ -24,7 +24,7 @@ export default function RootLayout() {
     return (
         <AppContextProvider>
             <AlertContextProvider>
-                <Suspense></Suspense><Alert />
+                <Alert />
                 <Spinner />
                 <div className="bg-slate-50 dark:bg-gray-950">
                     <Header

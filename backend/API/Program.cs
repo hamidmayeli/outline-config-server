@@ -96,6 +96,9 @@ builder.Services
 builder.Services.Configure<AuthenticationSettings>(
     options => builder.Configuration.GetSection("Authentication").Bind(options));
 
+builder.Services.Configure<ReportSettings>(
+    options => builder.Configuration.GetSection("Report").Bind(options));
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllPolicy",

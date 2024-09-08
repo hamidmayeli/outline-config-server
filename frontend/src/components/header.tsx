@@ -32,7 +32,8 @@ export default function Header({
         <div className="p-2 w-full">
         </div>
 
-        <div className="px-2 flex items-center h-full shrink-0">
+        <div className="px-2 flex items-center h-full shrink-0 gap-2">
+          <Link to="/report" >Report</Link>
           <svg id="theme-toggle" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
             onClick={() => toggle()}
             className="w-8 h-8 stroke-sky-900 dark:stroke-orange-500 cursor-pointer"
