@@ -63,3 +63,7 @@
 .grecaptcha-badge { 
     visibility: hidden;
 }
+
+.recharts-default-tooltip {
+    @apply dark:bg-brand !important;
+}
