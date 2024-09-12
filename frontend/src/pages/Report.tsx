@@ -5,7 +5,7 @@ import { toHumanReadableBytes } from "tools/misc";
 
 export default function Report() {
     const lightColors = ["#6a5acd", "#ff6347", "#ffd700", "#40e0d0", "#ff69b4", "#ba55d3", "#87cefa", "#32cd32", "#ff4500", "#7fffd4"];
-    const darkColors = ["#ff7f50", "#7fff00", "#ff1493", "#00ced1", "#ff4500", "#1e90ff", "#32cd32", "#ff6347", "#8a2be2", "#ffd700"];
+    const darkColors = ["#ff7f50", "#00ced1", "#7fff00", "#ff1493", "#ff4500", "#1e90ff", "#32cd32", "#ff6347", "#8a2be2", "#ffd700"];
 
     const [data, setData] = useState<IChartData[]>([]);
     const [dataKeys, setDataKeys] = useState<string[]>([]);
@@ -16,7 +16,7 @@ export default function Report() {
         baseApi.getApi<IUsageSnapshot[]>("/v1/report")
             .then(response => {
                 const temp = convertToChartData(response ?? [])
-                const tempKeys = Array.from(new Set(temp.flatMap(Object.keys))).filter(key => key !== 'date');
+                const tempKeys = Array.from(new Set(temp.flatMap(Object.keys))).filter(key => key !== 'date').sort();
 
                 startTransition(() => {
                     setData(temp);
@@ -43,6 +43,15 @@ export default function Report() {
             for (const [name, value] of Object.entries(snapshot.usage)) {
                 groupedData[dateKey][name] = value;
             }
+
+            let sum = 0;
+
+            for (const [name, value] of Object.entries(snapshot.usage)) {
+                if(name !== "date")
+                    sum += value;
+            }
+
+            groupedData[dateKey]["_all"] = sum;
         });
 
         // Convert grouped data into an array
@@ -65,11 +74,11 @@ export default function Report() {
         return [toHumanReadableBytes(value), name];
     };
 
-    console.log({ isDark: isDark() });
+    console.log({ data, dataKeys });
 
     return (
-        <div>
-            <ResponsiveContainer width="100%" height={400}>
+        <div style={{ height: "calc(100vh - 70px)" }}>
+            <ResponsiveContainer>
                 <LineChart data={data}>
                     {dataKeys.map((key, index) => (
                         <Line
