@@ -21,12 +21,17 @@ export function ServerName({ serverInfo }: { serverInfo: IServerInfo }) {
 
     if (!editing)
         return (
-            <h1
-                className="text-2xl text-center mb-5"
-                onClick={() => setEditing(true)}
-            >
-                {name}
-            </h1>
+            <>
+                <h1
+                    className="text-2xl text-center"
+                    onClick={() => setEditing(true)}
+                >
+                    {name}
+                </h1>
+                <h2 className="text-sm text-center mb-5">
+                    {serverInfo.hostnameForAccessKeys}
+                </h2>
+            </>
         );
 
     return (
