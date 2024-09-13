@@ -9,6 +9,7 @@ namespace API.Services;
 public interface IReportService
 {
     Task Add(UsageSnapshot snapshot);
+    Task Delete(int olderThanDays);
     Task<IEnumerable<UsageSnapshot>> Get(int count);
 }
 
@@ -55,6 +56,17 @@ public class ReportService(
         var result = JsonSerializer.Deserialize<List<UsageSnapshot>>(builder.ToString()) ?? [];
 
         return result;
+    }
+
+    public Task Delete(int olderThanDays)
+    {
+        var files = new HashSet<string>(Enumerable.Range(0, olderThanDays).Select(GetFilename));
+
+        foreach (var filename in Directory.EnumerateFiles(_rootFolder, "??????.log"))
+            if(!files.Contains(filename))
+                File.Delete(filename);
+
+        return Task.CompletedTask;
     }
 
     private string GetFilename(int delta = 0) => Path.Combine(_rootFolder, $"{DateTime.UtcNow.AddDays(-delta):yyMMdd}.log");

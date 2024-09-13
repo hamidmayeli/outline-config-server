@@ -1,4 +1,5 @@
 import { baseApi } from "apis/baseApi";
+import { TextInput } from "components/textInput";
 import { startTransition, useEffect, useState } from "react";
 import { Brush, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toHumanReadableBytes } from "tools/misc";
@@ -9,6 +10,8 @@ export default function Report() {
 
     const [data, setData] = useState<IChartData[]>([]);
     const [dataKeys, setDataKeys] = useState<string[]>([]);
+    const [oldLogs, setOldLogs] = useState(30);
+    const [loadCount, reload] = useState(1);
 
     const isDark = () => document.body.classList.contains("dark");
 
@@ -25,7 +28,7 @@ export default function Report() {
             })
             .catch(err => console.error(err));
 
-    }, []);
+    }, [loadCount]);
 
     const convertToChartData = (usageSnapshots: IUsageSnapshot[]) => {
         const groupedData: Record<string, IChartData> = {};
@@ -47,7 +50,7 @@ export default function Report() {
             let sum = 0;
 
             for (const [name, value] of Object.entries(snapshot.usage)) {
-                if(name !== "date")
+                if (name !== "date")
                     sum += value;
             }
 
@@ -74,28 +77,52 @@ export default function Report() {
         return [toHumanReadableBytes(value), name];
     };
 
-    console.log({ data, dataKeys });
+    const createALog = () => {
+        baseApi.putApi("/v1/report")
+            .then(() => reload(loadCount + 1))
+            .catch(err => console.error(err));
+    };
+
+    const deleteOldLogs = () => {
+        baseApi.deleteApi(`/v1/report/${oldLogs}`)
+            .then(() => reload(loadCount + 1))
+            .catch(err => console.error(err));
+    };
 
     return (
-        <div style={{ height: "calc(100vh - 70px)" }}>
-            <ResponsiveContainer>
-                <LineChart data={data}>
-                    {dataKeys.map((key, index) => (
-                        <Line
-                            key={index}
-                            type="monotone"
-                            dataKey={key}
-                            stroke={isDark() ? darkColors[index % darkColors.length] : lightColors[index % lightColors.length]}
-                        />
-                    ))}
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" tickFormatter={formatXAxis} />
-                    <YAxis tickFormatter={formatYAxis} />
-                    <Tooltip formatter={formatTooltip} />
-                    <Legend />
-                    <Brush dataKey="date" height={30} stroke="#4d78f7" startIndex={data.length > 10 ? data.length - 10 : 0}/>
-                </LineChart>
-            </ResponsiveContainer>
-        </div>
+        <>
+            <div style={{ height: "calc(100vh - 70px)" }}>
+                <ResponsiveContainer>
+                    <LineChart data={data}>
+                        {dataKeys.map((key, index) => (
+                            <Line
+                                key={index}
+                                type="monotone"
+                                dataKey={key}
+                                stroke={isDark() ? darkColors[index % darkColors.length] : lightColors[index % lightColors.length]}
+                            />
+                        ))}
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="date" tickFormatter={formatXAxis} />
+                        <YAxis tickFormatter={formatYAxis} />
+                        <Tooltip formatter={formatTooltip} />
+                        <Legend />
+                        <Brush dataKey="date" height={30} stroke="#4d78f7" startIndex={data.length > 10 ? data.length - 10 : 0} />
+                    </LineChart>
+                </ResponsiveContainer>
+            </div>
+            <div className="flex gap-2 flex-col pt-10">
+                <button className="btn" onClick={createALog}>Create a log</button>
+                <div className="flex gap-1">
+                    <TextInput
+                        className="grow"
+                        type="number"
+                        onChange={e => setOldLogs(+e.target.value)}
+                        value={oldLogs}
+                    />
+                    <button className="btn grow" onClick={deleteOldLogs}>Delete old logs</button>
+                </div>
+            </div>
+        </>
     );
 }
