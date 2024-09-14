@@ -111,7 +111,7 @@ export default function Report() {
                     </LineChart>
                 </ResponsiveContainer>
             </div>
-            <div className="flex gap-2 flex-col pt-10">
+            <div className="flex gap-2 flex-col pt-10 pb-20">
                 <button className="btn" onClick={createALog}>Create a log</button>
                 <div className="flex gap-1">
                     <TextInput
