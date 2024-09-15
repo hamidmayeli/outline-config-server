@@ -48,13 +48,20 @@ public class UsageLoggerService(
 
         foreach (var server in servers)
         {
-            var client = _clientFactory.Create(server.ApiUrl);
-            var usage = await client.GetUsage(server.ApiPrefix);
+            try
+            {
+                var client = _clientFactory.Create(server.ApiUrl);
+                var usage = await client.GetUsage(server.ApiPrefix);
 
-            usageList.Add(
-                server.Name,
-                usage.BytesTransferredByUserId.Sum(x => x.Value)
-            );
+                usageList.Add(
+                    server.Name,
+                    usage.BytesTransferredByUserId.Sum(x => x.Value)
+                );
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "Failed to get the usage for {server}.", server.Name);
+            }
         }
 
         var snapshot = new UsageSnapshot(DateTime.Now, usageList);
