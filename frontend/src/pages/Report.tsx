@@ -90,7 +90,7 @@ export default function Report() {
     };
 
     return (
-        <>
+        <div className="px-2">
             <div style={{ height: "calc(100vh - 70px)" }}>
                 <ResponsiveContainer>
                     <LineChart data={data}>
@@ -123,6 +123,6 @@ export default function Report() {
                     <button className="btn grow" onClick={deleteOldLogs}>Delete old logs</button>
                 </div>
             </div>
-        </>
+        </div>
     );
 }
