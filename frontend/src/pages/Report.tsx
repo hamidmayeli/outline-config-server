@@ -91,7 +91,7 @@ export default function Report() {
 
     return (
         <div className="px-2">
-            <div style={{ height: "calc(100vh - 70px)" }}>
+            <div style={{ height: "calc(100vh - 70px)" }} className="pr-5">
                 <ResponsiveContainer>
                     <LineChart data={data}>
                         {dataKeys.map((key, index) => (
