@@ -38,8 +38,6 @@ while [[ "$#" -gt 0 ]]; do
             SKIP_CERT=true
             ;;
         *) 
-            echo "Unknown parameter passed: $1"
-            usage
             ;;
     esac
     shift
