@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y openssl
 
 # Generate and trust the developer certificate
 RUN dotnet dev-certs https --clean
+RUN mkdir -p /root/.aspnet/https/
 RUN dotnet dev-certs https -ep /root/.aspnet/https/aspnetapp.pfx -p password
 RUN dotnet dev-certs https --trust
 

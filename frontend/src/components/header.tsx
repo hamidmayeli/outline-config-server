@@ -23,17 +23,15 @@ export default function Header({
       dark:text-slate-200 h-14 px-1 md:px-2 shadow dark:shadow-slate-800 z-50 relative">
       <nav className="flex max-w-5xl mx-auto h-full justify-center items-center">
         <div className="flex justify-center items-center flex-shrink-0">
-          <Link to="/" >
-            <Logo className="w-8" />
-          </Link>
-          {currentUser ? (<button onClick={() => logout()} className="px-3">Logout</button>) : null}
+          <Link to="/" ><Logo className="w-8" /></Link>
+          <Link to="/report" className="px-3">Report</Link>
         </div>
 
         <div className="p-2 w-full">
         </div>
 
         <div className="px-2 flex items-center h-full shrink-0 gap-2">
-          <Link to="/report" >Report</Link>
+          {currentUser ? (<button onClick={() => logout()}>Logout</button>) : null}
           <svg id="theme-toggle" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
             onClick={() => toggle()}
             className="w-8 h-8 stroke-sky-900 dark:stroke-orange-500 cursor-pointer"
