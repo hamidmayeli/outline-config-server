@@ -45,6 +45,7 @@ public class UsageLoggerService(
             .ToArray();
 
         var usageList = new Dictionary<string, long>();
+        var details = new List<UsageDetail>();
 
         foreach (var server in servers)
         {
@@ -57,6 +58,13 @@ public class UsageLoggerService(
                     server.Name,
                     usage.BytesTransferredByUserId.Sum(x => x.Value)
                 );
+
+                var keys = (await client.GetAccessKey(server.ApiPrefix))
+                    .AccessKeys.ToDictionary(x => x.Id, x => x.Name);
+
+                string getKeyName(string id) => keys.TryGetValue(id, out var key) ? key : "deleted";
+
+                details.AddRange(usage.BytesTransferredByUserId.Select(x => new UsageDetail(server.Name, getKeyName(x.Key), x.Value)));
             }
             catch (Exception exception)
             {
@@ -64,7 +72,7 @@ public class UsageLoggerService(
             }
         }
 
-        var snapshot = new UsageSnapshot(DateTime.Now, usageList);
+        var snapshot = new UsageSnapshot(DateTime.Now, usageList, details);
 
         await _reportService.Add(snapshot);
 

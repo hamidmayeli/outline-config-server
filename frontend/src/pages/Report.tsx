@@ -10,6 +10,9 @@ export default function Report() {
 
     const [data, setData] = useState<IChartData[]>([]);
     const [dataKeys, setDataKeys] = useState<string[]>([]);
+    const [detailsData, setDetailsData] = useState<Record<string, IChartData[]>>({});
+    const [serverNames, setServerNames] = useState<string[]>([]);
+    const [detailsDataKeys, setDetailsDataKeys] = useState<Record<string, string[]>>({});
     const [oldLogs, setOldLogs] = useState(30);
     const [loadCount, reload] = useState(1);
 
@@ -20,15 +23,61 @@ export default function Report() {
             .then(response => {
                 const temp = convertToChartData(response ?? [])
                 const tempKeys = Array.from(new Set(temp.flatMap(Object.keys))).filter(key => key !== 'date').sort();
+                const tempDetails = mapUsageSnapshotsToChartData(response ?? []);
+                const serverNames = Object.keys(tempDetails);
+
+                const tempDetailsKeys: Record<string, string[]> = {};
+
+                Object.keys(tempDetails).map(s => {
+                    tempDetailsKeys[s] = Array.from(new Set(tempDetails[s].flatMap(Object.keys))).filter(key => key !== 'date').sort();
+                }
+                );
 
                 startTransition(() => {
                     setData(temp);
                     setDataKeys(tempKeys);
+                    setDetailsData(tempDetails);
+                    setServerNames(serverNames);
+                    setDetailsDataKeys(tempDetailsKeys);
                 });
             })
             .catch(err => console.error(err));
 
     }, [loadCount]);
+
+    const mapUsageSnapshotsToChartData = (snapshots: IUsageSnapshot[]) => {
+        const chartData: Record<string, IChartData[]> = {};
+
+        snapshots.forEach(snapshot => {
+            if (!snapshot.details) return;
+
+            // Create a temporary map to group by server and aggregate keys for each timestamp
+            const tempData: Record<string, IChartData> = {};
+
+            snapshot.details.forEach(({ server, key, usage }) => {
+                // If the server doesn't exist in tempData, initialize it with the date and an empty object for dynamic keys
+                if (!tempData[server]) {
+                    tempData[server] = {
+                        date: snapshot.timeStamp,
+                    };
+                }
+
+                // Add or update the dynamic key (like Mayeli, Shahabi, etc.) for the current server
+                tempData[server][key] = usage;
+            });
+
+            // Push the aggregated data for each server into the main chartData array
+            Object.keys(tempData).forEach(server => {
+                if (!chartData[server]) {
+                    chartData[server] = [];
+                }
+
+                chartData[server].push(tempData[server]);
+            });
+        });
+
+        return chartData;
+    }
 
     const convertToChartData = (usageSnapshots: IUsageSnapshot[]) => {
         const groupedData: Record<string, IChartData> = {};
@@ -89,12 +138,12 @@ export default function Report() {
             .catch(err => console.error(err));
     };
 
-    return (
-        <div className="px-2">
+    const Chart = ({ chartData, theKeys }: { chartData: IChartData[], theKeys: string[] }) => {
+        return (
             <div style={{ height: "calc(100vh - 70px)" }} className="pr-5">
                 <ResponsiveContainer>
-                    <LineChart data={data}>
-                        {dataKeys.map((key, index) => (
+                    <LineChart data={chartData}>
+                        {theKeys.map((key, index) => (
                             <Line
                                 key={index}
                                 type="monotone"
@@ -111,6 +160,12 @@ export default function Report() {
                     </LineChart>
                 </ResponsiveContainer>
             </div>
+        );
+    }
+
+    return (
+        <div className="px-2">
+            <Chart chartData={data} theKeys={dataKeys} />
             <div className="flex gap-2 flex-col pt-10 pb-20">
                 <button className="btn" onClick={createALog}>Create a log</button>
                 <div className="flex gap-1">
@@ -123,6 +178,12 @@ export default function Report() {
                     <button className="btn grow" onClick={deleteOldLogs}>Delete old logs</button>
                 </div>
             </div>
+            {serverNames.map(x => (
+                <div className="pb-20">
+                    <div className="text-center text-xl pb-5">{x}</div>
+                    <Chart key={x} chartData={detailsData[x]} theKeys={detailsDataKeys[x]} />
+                </div>
+            ))}
         </div>
     );
 }

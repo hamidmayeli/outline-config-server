@@ -1,6 +1,11 @@
 interface IUsageSnapshot {
     timeStamp: string;
     usage: Record<string, number>;
+    details?: Array<{
+        server: string,
+        key: string,
+        usage: number,
+    }>
 }
 
 interface IChartData {
