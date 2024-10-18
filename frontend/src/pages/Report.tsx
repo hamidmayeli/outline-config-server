@@ -156,7 +156,7 @@ export default function Report() {
                         <YAxis tickFormatter={formatYAxis} />
                         <Tooltip formatter={formatTooltip} />
                         <Legend />
-                        <Brush dataKey="date" height={30} stroke="#4d78f7" startIndex={data.length > 24 ? data.length - 24 : 0} />
+                        <Brush dataKey="date" height={30} stroke="#4d78f7" startIndex={chartData.length > 24 ? chartData.length - 24 : 0} />
                     </LineChart>
                 </ResponsiveContainer>
             </div>
