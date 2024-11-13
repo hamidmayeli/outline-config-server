@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0-bookworm-slim AS build
 
 # Install OpenSSL for certificate generation
 RUN apt-get update && apt-get install -y openssl
@@ -24,7 +24,7 @@ FROM build AS publish
 RUN dotnet publish ./API/API.csproj -c Release -o /app/publish
 
 # ============== Build Client  ============== 
-FROM node:20.10.0-slim AS build-client
+FROM node:22.11.0-slim AS build-client
 
 RUN apt-get update && apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb jq -y
 
@@ -37,7 +37,7 @@ COPY ./frontend .
 # RUN npm run lint && npm run build
 RUN npm run build
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 
 WORKDIR /app
 COPY --from=publish /app/publish .
