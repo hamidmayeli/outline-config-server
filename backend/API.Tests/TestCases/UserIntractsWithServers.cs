@@ -121,16 +121,45 @@ internal class UserIntractsWithServers : TestCaseBase
         _user.Servers?.ShouldNotContain(server);
     }
 
+    [Test]
+    public async Task WhenHasServer_CanGetKeys()
+    {
+        // Arrange
+        var server = CreateServer(Guid.NewGuid());
+        _user.Servers.Add(server);
+        _fixture.Users.Update(_user);
+
+        _fixture.OutlineServerClient
+            .GetAccessKey(server.ApiPrefix)
+            .Returns(new AccessKeyCollectionResponse([
+                    new AccessKeyResponse("k-id", "k-name", "accessUrl", null),
+                ]));
+        
+        // Act
+        var response = await _client.GetAsync($"/api/v1/server/{server.ServerId}/keys");
+        
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var keys = await response.Content.ReadFromJsonAsync<List<LocalAccessKey>>();
+        keys.ShouldNotBeEmpty();
+    }
+
+    [Test]
+    public async Task WhenHasServer_CanSetItsName()
+    {
+        // Arrange
+        var server = CreateServer(Guid.NewGuid());
+        _user.Servers.Add(server);
+        _fixture.Users.Update(_user);
+
+        // Act
+        var response = await _client.PutAsJsonAsync($"/api/v1/server/{server.ServerId}/name", new SetNameRequest("new name"));
+        
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
+        await _fixture.OutlineServerClient.Received(1).SetServerName(server.ApiPrefix, new("new name"));
+    }
+
     private void ReloadUser() =>
         _user = _fixture.Users.FindOne(x => x.Username == _user.Username);
-
-    private static ServerModel CreateServer(Guid id)
-    {
-        return new()
-        {
-            ApiUrl = $"http://server.com/{id}",
-            Name = $"Server {id}",
-            ServerId = id,
-        };
-    }
 }
