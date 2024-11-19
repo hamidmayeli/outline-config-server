@@ -13,6 +13,7 @@ WORKDIR /sln
 
 COPY ./backend/API.sln ./
 COPY ./backend/API/*.csproj ./API/
+COPY ./backend/API.Tests/*.csproj ./API.Tests/
 
 RUN dotnet restore
 
@@ -22,6 +23,10 @@ RUN dotnet build -c Release
 
 FROM build AS publish
 RUN dotnet publish ./API/API.csproj -c Release -o /app/publish
+
+FROM build AS test-api
+WORKDIR /sln
+RUN dotnet test ./API.sln
 
 # ============== Build Client  ============== 
 FROM node:22.11.0-slim AS build-client
