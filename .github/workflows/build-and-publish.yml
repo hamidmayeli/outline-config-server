@@ -31,9 +31,8 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build and push Docker image
-      needs: login
       # only on push to main branch
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'      
+      if: steps.login.outcome == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main'      
       uses: docker/build-push-action@v6
       with:
         context: .
@@ -41,9 +40,8 @@ jobs:
         tags: hamidmayeli/olm:latest
 
     - name: Build and push Docker image
-      needs: login
       # only on pull request
-      if: github.event_name == 'pull_request'
+      if: steps.login.outcome == 'success' && github.event_name == 'pull_request'
       uses: docker/build-push-action@v6
       with:
         context: .
