@@ -22,6 +22,9 @@ jobs:
     - name: Test API
       run: docker build --target test-api .
 
+    - name: Build client
+      run: docker build --target build-client .
+
     - name: Log in to Docker Hub
       id: login
       if: github.actor != 'dependabot[bot]'
