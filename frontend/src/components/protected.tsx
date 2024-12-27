@@ -1,4 +1,4 @@
-import { useContext, Suspense } from "react";
+import { useContext, Suspense, JSX } from "react";
 import { AppContext } from "./appContext";
 import { Navigate, useLocation } from "react-router-dom";
 
