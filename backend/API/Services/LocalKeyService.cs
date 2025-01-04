@@ -52,7 +52,7 @@ public class LocalKeyService(
         var request = _httpContextAccessor.HttpContext?.Request
             ?? throw new InvalidOperationException();
 
-        var keys = Keys.FindAll();
+        var keys = Keys.FindAll().ToList();
 
         foreach (var key in keys)
             SetConfigUrl(key, request);
