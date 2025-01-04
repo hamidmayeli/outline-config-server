@@ -86,6 +86,14 @@ export default function Server() {
           }
     };
 
+    const updateDomain = () => {
+        baseApi.putApi("/v1/config")
+            .then(() => {
+                alert("Updated");
+            })
+            .catch(err => console.error(err));
+    };
+
     if (!loading)
         return (
             <>
@@ -140,6 +148,10 @@ export default function Server() {
                             </button>
                         </div>
                     </div>
+                </div>
+
+                <div className="boxed-area mb-2 items-center">
+                    <button className="btn" onClick={updateDomain}>Update the domain of the configs</button>
                 </div>
             </>
         );

@@ -40,4 +40,11 @@ public class ConfigController(
         await _localKeyService.Delete(keyId);
         return TypedResults.NoContent();
     }
+
+    [HttpPut]
+    public async Task<NoContent> Update()
+    {
+        await _localKeyService.UpdateDomain();
+        return TypedResults.NoContent();
+    }
 }

@@ -1,6 +1,5 @@
 ﻿using API.Models;
 using LiteDB;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
 
 namespace API.Services;
 
@@ -10,6 +9,7 @@ public interface ILocalKeyService
     Task<IEnumerable<LocalKey>> GetAll();
     Task Upsert(LocalKey key);
     Task Delete(Guid keyId);
+    Task UpdateDomain();
 }
 
 public class LocalKeyService(
@@ -27,7 +27,7 @@ public class LocalKeyService(
         var request = _httpContextAccessor.HttpContext?.Request
             ?? throw new InvalidOperationException();
 
-        key.ConfigUrl = $"ssconf://{request.Host}/api/v1/config/{key.Id}#{key.Name}";
+        SetConfigUrl(key, request);
 
         Keys.Upsert(key);
 
@@ -46,4 +46,24 @@ public class LocalKeyService(
 
         return Task.CompletedTask;
     }
+
+    public Task UpdateDomain()
+    {
+        var request = _httpContextAccessor.HttpContext?.Request
+            ?? throw new InvalidOperationException();
+
+        var keys = Keys.FindAll();
+
+        foreach (var key in keys)
+            SetConfigUrl(key, request);
+
+        Keys.Update(keys);
+
+        _logger.LogInformation("Local keys updated");
+
+        return Task.CompletedTask;
+    }
+
+    private static void SetConfigUrl(LocalKey key, HttpRequest request)
+        => key.ConfigUrl = $"ssconf://{request.Host}/api/v1/config/{key.Id}#{key.Name}";
 }
