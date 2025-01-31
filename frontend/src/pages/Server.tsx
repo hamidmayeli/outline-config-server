@@ -146,7 +146,7 @@ export default function Server() {
 
                 {keys.map(key => (<div key={key.id} className="flex boxed-area mb-2 items-center">
                     <div className="w-1/3" onClick={() => selectForUpdate(key)}>{key.name}</div>
-                    <div className="flex-grow">
+                    <div className="grow">
                         <span>{toHumanReadableBytes(key.dataLimit.consumed)}</span>{key.dataLimit.bytes ? (<span> / {toHumanReadableBytes(key.dataLimit.bytes)}</span>) : null}
                     </div>
                     <div className="flex flex-col gap-1">

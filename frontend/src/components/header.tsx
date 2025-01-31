@@ -22,7 +22,7 @@ export default function Header({
     <header className="border-b-gray-500 bg-sky-100 dark:bg-gray-900 text-gray-800
       dark:text-slate-200 h-14 px-1 md:px-2 shadow dark:shadow-slate-800 z-50 relative">
       <nav className="flex max-w-5xl mx-auto h-full justify-center items-center">
-        <div className="flex justify-center items-center flex-shrink-0">
+        <div className="flex justify-center items-center shrink-0">
           <Link to="/" ><Logo className="w-8" /></Link>
           <Link to="/report" className="px-3">Report</Link>
         </div>
