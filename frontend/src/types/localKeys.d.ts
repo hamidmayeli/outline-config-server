@@ -3,4 +3,5 @@ interface ILocalKey {
     name: string;
     configUrl: string;
     accessKey: string;
+    cfUrl?: string;
 }

@@ -86,12 +86,15 @@ public class ServerService(
             return hashIndex >= 0 ? input[..hashIndex] : input;
         }
 
-        var localConfigs = LocalKeys.FindAll().ToDictionary(x => removeHash(x.AccessKey), x => x.ConfigUrl);
+        var localConfigs = LocalKeys.FindAll().ToDictionary(x => removeHash(x.AccessKey), x => x);
 
         foreach (var item in accessKeyCollection.AccessKeys)
         {
-            if (localConfigs.TryGetValue(item.AccessUrl, out var configUrl))
-                item.ConfigUrl = configUrl;
+            if (localConfigs.TryGetValue(item.AccessUrl, out var localKey))
+            {
+                item.ConfigUrl = localKey.ConfigUrl;
+                item.CfUrl = localKey.CfUrl;
+            }
         }
 
         return accessKeyCollection.AccessKeys;

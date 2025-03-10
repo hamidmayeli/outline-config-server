@@ -16,6 +16,7 @@ public class LocalKeyService(
     ILiteDatabase _database,
     ILogger<LocalKeyService> _logger,
     IHttpContextAccessor _httpContextAccessor,
+    IConfiguration _configuration,
     ICFConfigResolver _cfConfigResolver
     ) : ILocalKeyService
 {
@@ -30,16 +31,23 @@ public class LocalKeyService(
 
         SetConfigUrl(key, request);
 
-        Keys.Upsert(key);
-
         try
         {
             await _cfConfigResolver.SetConfig(key.Id, key.AccessKey);
+
+            key.CfUrl = _cfConfigResolver.CreateGetEndpoint(
+                _configuration.GetValue<string>("CFConfig:Url"),
+                key.Id
+                );
+
+            _logger.LogInformation("Cloudflare key upserted {key}", key.Id);
         }
         catch (Exception exception)
         {
             _logger.LogCritical(exception, "Failed to upsert local key {key}", key);
         }
+
+        Keys.Upsert(key);
 
         _logger.LogInformation("Local key upserted {key}", key);
     }

@@ -77,13 +77,13 @@ export default function Server() {
     const deleteKey = (id: string) => {
         if (deleteConfirmed.indexOf(id) >= 0) {
             baseApi.deleteApi(`/v1/config/${id}`)
-              .then(() => {
-                setKeys(keys.filter(x => x.id !== id));
-              })
-              .catch(err => console.error(err));
-          } else {
+                .then(() => {
+                    setKeys(keys.filter(x => x.id !== id));
+                })
+                .catch(err => console.error(err));
+        } else {
             setDeleteConfirmed([...deleteConfirmed, id]);
-          }
+        }
     };
 
     const updateDomain = () => {
@@ -108,6 +108,12 @@ export default function Server() {
                             onClick={() => copyToClipboard(key.configUrl)}>
                             Copy
                         </button>
+                        {key.cfUrl ? (
+                            <button className="btn w-20"
+                                onClick={() => copyToClipboard(key.cfUrl!)}>
+                                CF
+                            </button>
+                        ) : null}
                         <button className="btn w-20"
                             onClick={() => deleteKey(key.id)}>
                             {deleteConfirmed.indexOf(key.id) >= 0 ? "Delete" : "X"}
