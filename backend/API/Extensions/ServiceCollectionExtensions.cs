@@ -1,5 +1,6 @@
 ﻿using API.Services;
 using LiteDB;
+using Refit;
 
 namespace API.Extensions;
 
@@ -27,7 +28,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddProjectServices(this IServiceCollection services)
     {
-        return services
+        services
             .AddTransient<IOutlineServerClientFactory, OutlineServerClientFactory>()
             .AddTransient<IDateTimeService, DateTimeService>()
             .AddTransient<IUserService, UserService>()
@@ -38,5 +39,16 @@ public static class ServiceCollectionExtensions
             .AddTransient<IReportService, ReportService>()
             .AddHttpContextAccessor()
             .AddHostedService<TimedHostedService>();
+
+        services.AddRefitClient<ICFConfigResolver>()
+            .ConfigureHttpClient((sp, client) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+
+                client.BaseAddress = new Uri(config.GetSection("CFConfig:Url").Get<string>() ?? "https://not.there");
+                client.DefaultRequestHeaders.Add("api-version", config.GetSection("CFConfig:ApiVersion").Get<string>() ?? "");
+            });
+
+        return services;
     }
 }

@@ -15,14 +15,15 @@ public interface ILocalKeyService
 public class LocalKeyService(
     ILiteDatabase _database,
     ILogger<LocalKeyService> _logger,
-    IHttpContextAccessor _httpContextAccessor
+    IHttpContextAccessor _httpContextAccessor,
+    ICFConfigResolver _cfConfigResolver
     ) : ILocalKeyService
 {
     private ILiteCollection<LocalKey> Keys => _database.GetCollection<LocalKey>();
 
     public Task<IEnumerable<LocalKey>> GetAll() => Task.FromResult(Keys.FindAll());
 
-    public Task Upsert(LocalKey key)
+    public async Task Upsert(LocalKey key)
     {
         var request = _httpContextAccessor.HttpContext?.Request
             ?? throw new InvalidOperationException();
@@ -31,9 +32,16 @@ public class LocalKeyService(
 
         Keys.Upsert(key);
 
-        _logger.LogInformation("Local key upserted {key}", key);
+        try
+        {
+            await _cfConfigResolver.SetConfig(key.Id, key.AccessKey);
+        }
+        catch (Exception exception)
+        {
+            _logger.LogCritical(exception, "Failed to upsert local key {key}", key);
+        }
 
-        return Task.CompletedTask;
+        _logger.LogInformation("Local key upserted {key}", key);
     }
 
     public Task<string?> GetAccessKey(Guid id)
