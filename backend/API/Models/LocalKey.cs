@@ -12,4 +12,6 @@ public class LocalKey
     public required string AccessKey { get; set; }
 
     public required string ConfigUrl { get; set; }
+
+    public  string? CfUrl { get; set; }
 }

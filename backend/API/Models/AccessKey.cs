@@ -8,6 +8,7 @@ public record AccessKeyResponse
     public DataLimit DataLimit { get; }
 
     public string? ConfigUrl { get; set; }
+    public string? CfUrl { get; set; }
 
     public AccessKeyResponse
     (
