@@ -35,10 +35,12 @@ public class LocalKeyService(
         {
             await _cfConfigResolver.SetConfig(key.Id, key.AccessKey);
 
-            key.CfUrl = _cfConfigResolver.CreateGetEndpoint(
+            var endpoint = _cfConfigResolver.CreateGetEndpoint(
                 _configuration.GetValue<string>("CFConfig:Url"),
                 key.Id
-                );
+                ).Replace("https", "ssconf");
+
+            key.CfUrl = $"{endpoint}#cf-{key.Name}";
 
             _logger.LogInformation("Cloudflare key upserted {key}", key.Id);
         }
