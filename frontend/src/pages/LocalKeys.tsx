@@ -108,12 +108,6 @@ export default function Server() {
                             onClick={() => copyToClipboard(key.configUrl)}>
                             Copy
                         </button>
-                        {key.cfUrl ? (
-                            <button className="btn w-20"
-                                onClick={() => copyToClipboard(key.cfUrl!)}>
-                                CF
-                            </button>
-                        ) : null}
                         <button className="btn w-20"
                             onClick={() => deleteKey(key.id)}>
                             {deleteConfirmed.indexOf(key.id) >= 0 ? "Delete" : "X"}

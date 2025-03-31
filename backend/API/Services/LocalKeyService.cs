@@ -15,43 +15,25 @@ public interface ILocalKeyService
 public class LocalKeyService(
     ILiteDatabase _database,
     ILogger<LocalKeyService> _logger,
-    IHttpContextAccessor _httpContextAccessor,
-    IConfiguration _configuration,
-    ICFConfigResolver _cfConfigResolver
+    IHttpContextAccessor _httpContextAccessor
     ) : ILocalKeyService
 {
     private ILiteCollection<LocalKey> Keys => _database.GetCollection<LocalKey>();
 
     public Task<IEnumerable<LocalKey>> GetAll() => Task.FromResult(Keys.FindAll());
 
-    public async Task Upsert(LocalKey key)
+    public Task Upsert(LocalKey key)
     {
         var request = _httpContextAccessor.HttpContext?.Request
             ?? throw new InvalidOperationException();
 
         SetConfigUrl(key, request);
 
-        try
-        {
-            await _cfConfigResolver.SetConfig(key.Id, key.AccessKey);
-
-            var endpoint = _cfConfigResolver.CreateGetEndpoint(
-                _configuration.GetValue<string>("CFConfig:Url"),
-                key.Id
-                ).Replace("https", "ssconf");
-
-            key.CfUrl = $"{endpoint}#cf-{key.Name}";
-
-            _logger.LogInformation("Cloudflare key upserted {key}", key.Id);
-        }
-        catch (Exception exception)
-        {
-            _logger.LogCritical(exception, "Failed to upsert local key {key}", key);
-        }
-
         Keys.Upsert(key);
 
         _logger.LogInformation("Local key upserted {key}", key);
+
+        return Task.CompletedTask;
     }
 
     public Task<string?> GetAccessKey(Guid id)

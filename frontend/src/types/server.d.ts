@@ -22,7 +22,6 @@ interface IAccessKeyResponse {
         consumed: number;
     };
     configUrl?: string;
-    cfUrl?: string;
 }
 
 interface INewServerDto {

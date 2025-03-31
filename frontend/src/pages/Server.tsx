@@ -164,12 +164,6 @@ export default function Server() {
                                 Config
                             </button>
                         ) : null}
-                        {key.cfUrl ? (
-                            <button className="btn w-20"
-                                onClick={() => copyToClipboard(key.cfUrl!)}>
-                                CF
-                            </button>
-                        ) : null}
                     </div>
                 </div>))}
 

@@ -89,13 +89,8 @@ public class ServerService(
         var localConfigs = LocalKeys.FindAll().ToDictionary(x => removeHash(x.AccessKey), x => x);
 
         foreach (var item in accessKeyCollection.AccessKeys)
-        {
             if (localConfigs.TryGetValue(item.AccessUrl, out var localKey))
-            {
                 item.ConfigUrl = localKey.ConfigUrl;
-                item.CfUrl = localKey.CfUrl;
-            }
-        }
 
         return accessKeyCollection.AccessKeys;
     }
