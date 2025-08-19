@@ -56,4 +56,7 @@ export function toHumanReadableBytes(value: number){
 
     if(value < 1000000000000)
         return `${round(value / 1000000000)} GB`;
+
+    return `${round(value / 1000000000000)} TB`;
+
 }
