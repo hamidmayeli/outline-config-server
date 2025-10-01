@@ -5,6 +5,9 @@ import { startTransition, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toHumanReadableBytes } from "tools/misc";
 
+type SortCriteria = 'name' | 'consumed' | 'limit';
+type SortDirection = 'asc' | 'desc';
+
 export default function Server() {
     const { serverId } = useParams();
 
@@ -14,6 +17,8 @@ export default function Server() {
     const [serverInfo, setServerInfo] = useState<IServerInfo | undefined>();
     const [keys, setKeys] = useState<IAccessKeyResponse[]>([]);
     const [formData, setFormData] = useState<{ name?: string, limit: number }>({ limit: 0 });
+    const [sortCriteria, setSortCriteria] = useState<SortCriteria>('name');
+    const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
     const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = evt.target;
@@ -43,9 +48,7 @@ export default function Server() {
             });
 
             if (response) {
-                const list = [...keys, response];
-                list.sort(compare);
-                setKeys(list);
+                setKeys([...keys, response]);
                 setFormData({ limit: 0, name: "" });
             }
         }
@@ -71,9 +74,40 @@ export default function Server() {
     }
 
     const compare = (a: IAccessKeyResponse, b: IAccessKeyResponse) => {
-        if (a.name < b.name) return -1;
-        if (a.name > b.name) return 1;
-        return 0;
+        let comparison = 0;
+        
+        switch (sortCriteria) {
+            case 'name':
+                comparison = a.name.localeCompare(b.name);
+                break;
+            case 'consumed':
+                comparison = a.dataLimit.consumed - b.dataLimit.consumed;
+                break;
+            case 'limit':
+                const aLimit = a.dataLimit.bytes ?? 0;
+                const bLimit = b.dataLimit.bytes ?? 0;
+                comparison = aLimit - bLimit;
+                break;
+            default:
+                comparison = a.name.localeCompare(b.name);
+        }
+        
+        return sortDirection === 'asc' ? comparison : -comparison;
+    };
+
+    const handleSort = (criteria: SortCriteria) => {
+        if (sortCriteria === criteria) {
+            // Toggle direction if same criteria
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+        } else {
+            // Set new criteria with ascending direction
+            setSortCriteria(criteria);
+            setSortDirection('asc');
+        }
+    };
+
+    const getSortedKeys = () => {
+        return [...keys].sort(compare);
     };
 
     useEffect(() => {
@@ -86,7 +120,6 @@ export default function Server() {
         baseApi.getApi<IAccessKeyResponse[]>(`/v1/server/${serverId}/keys`)
             .then(keys => {
                 if (keys) {
-                    keys.sort(compare)
                     setKeys(keys);
                 }
             })
@@ -144,7 +177,51 @@ export default function Server() {
                     <div className="boxed-area text-center grow">{keys.length} Keys</div>
                 </div>
 
-                {keys.map(key => (<div key={key.id} className="flex boxed-area mb-2 items-center">
+                {/* Sort Header */}
+                <div className="flex boxed-area mb-2 items-center bg-gray-100 dark:bg-gray-800 font-semibold">
+                    <div className="w-1/3">
+                        <button 
+                            className="text-left hover:bg-gray-200 dark:hover:bg-gray-700 px-2 py-1 rounded flex items-center gap-1"
+                            onClick={() => handleSort('name')}
+                        >
+                            Name
+                            {sortCriteria === 'name' && (
+                                <span className="text-xs">
+                                    {sortDirection === 'asc' ? '↑' : '↓'}
+                                </span>
+                            )}
+                        </button>
+                    </div>
+                    <div className="grow">
+                        <button 
+                            className="text-left hover:bg-gray-200 dark:hover:bg-gray-700 px-2 py-1 rounded flex items-center gap-1"
+                            onClick={() => handleSort('consumed')}
+                        >
+                            Usage
+                            {sortCriteria === 'consumed' && (
+                                <span className="text-xs">
+                                    {sortDirection === 'asc' ? '↑' : '↓'}
+                                </span>
+                            )}
+                        </button>
+                        <button 
+                            className="text-left hover:bg-gray-200 dark:hover:bg-gray-700 px-2 py-1 rounded flex items-center gap-1 ml-4"
+                            onClick={() => handleSort('limit')}
+                        >
+                            Limit
+                            {sortCriteria === 'limit' && (
+                                <span className="text-xs">
+                                    {sortDirection === 'asc' ? '↑' : '↓'}
+                                </span>
+                            )}
+                        </button>
+                    </div>
+                    <div className="flex flex-col gap-1 w-20">
+                        Actions
+                    </div>
+                </div>
+
+                {getSortedKeys().map(key => (<div key={key.id} className="flex boxed-area mb-2 items-center">
                     <div className="w-1/3" onClick={() => selectForUpdate(key)}>{key.name}</div>
                     <div className="grow">
                         <span>{toHumanReadableBytes(key.dataLimit.consumed)}</span>{key.dataLimit.bytes ? (<span> / {toHumanReadableBytes(key.dataLimit.bytes)}</span>) : null}
