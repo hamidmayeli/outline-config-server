@@ -11,6 +11,7 @@ const App = lazy(() => import('pages/App'));
 const NewServer = lazy(() => import('pages/NewServer'));
 const LocalKeys = lazy(() => import('pages/LocalKeys'));
 const Report = lazy(() => import('pages/Report'));
+const Usage = lazy(() => import('pages/Usage'));
 
 const router = createBrowserRouter([
     {
@@ -36,6 +37,10 @@ const router = createBrowserRouter([
         {
           path: "server/:serverId",
           element: <Protected><Server /></Protected>,
+        },
+        {
+          path: "usage/:serverId",
+          element: <Protected><Usage /></Protected>,
         },
         {
           path: "report",
