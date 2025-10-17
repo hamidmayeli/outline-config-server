@@ -23,3 +23,19 @@ updates:
     frontend-group:
       patterns:
         - "*"
+
+- package-ecosystem: devcontainers
+  directory: "/backend/"
+  schedule:
+    interval: weekly
+    day: friday
+    time: "10:00"
+    timezone: Europe/London
+
+- package-ecosystem: devcontainers
+  directory: "/frontend/"
+  schedule:
+    interval: weekly
+    day: friday
+    time: "10:00"
+    timezone: Europe/London

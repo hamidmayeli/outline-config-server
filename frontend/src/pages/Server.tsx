@@ -2,7 +2,7 @@ import { baseApi } from "apis/baseApi";
 import { ServerName } from "components/serverName";
 import { TextInput } from "components/textInput";
 import { startTransition, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { toHumanReadableBytes } from "tools/misc";
 
 type SortCriteria = 'name' | 'consumed' | 'limit';
@@ -175,6 +175,12 @@ export default function Server() {
                 <div className="flex gap-5 mb-5">
                     <div className="boxed-area text-center grow">{getTotalUsage()}</div>
                     <div className="boxed-area text-center grow">{keys.length} Keys</div>
+                    <Link to={`/usage/${serverId}`} className="boxed-area text-center grow bg-blue-500 hover:bg-blue-600 text-white font-semibold transition-colors flex items-center justify-center gap-2" title="View Usage Chart">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
+                            <path d="M11 2v9.5c0 .3.2.5.5.5H21c0 4.4-3.6 8-8 8s-8-3.6-8-8 3.6-8 8-8z"/>
+                            <path d="M13 2c4.4 0 8 3.6 8 8h-8V2z" opacity="0.7"/>
+                        </svg>
+                    </Link>
                 </div>
 
                 {/* Sort Header */}
