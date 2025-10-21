@@ -25,7 +25,7 @@ export default defineConfig({
       workbox:{
         skipWaiting: true,
       },
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg', 'logo192.png', 'logo512.png'],
       manifestFilename: "manifest.json",
       manifest: {
         name: 'Outline Manager',
