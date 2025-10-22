@@ -24,6 +24,7 @@ export default defineConfig({
       injectRegister: 'auto',
       workbox:{
         skipWaiting: true,
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,woff,woff2,ttf}']
       },
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg', 'logo192.png', 'logo512.png'],
       manifestFilename: "manifest.json",
