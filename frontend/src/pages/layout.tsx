@@ -6,6 +6,7 @@ import AppContextProvider from "components/appContext";
 import { Spinner } from "components/spinner";
 import { AlertContextProvider } from "components/alertContext";
 import Alert from "components/alert";
+import UpdateNotification from "components/UpdateNotification";
 
 export default function RootLayout() {
     const stored = localStorage.getItem("isDark")?.toLocaleLowerCase();
@@ -26,6 +27,7 @@ export default function RootLayout() {
             <AlertContextProvider>
                 <Alert />
                 <Spinner />
+                <UpdateNotification />
                 <div className="bg-slate-50 dark:bg-gray-950 flex flex-col-reverse md:flex-col min-h-screen">
                     <Header
                         themeChanged={changeTheme}
