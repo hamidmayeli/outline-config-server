@@ -7,6 +7,8 @@ import { Spinner } from "components/spinner";
 import { AlertContextProvider } from "components/alertContext";
 import Alert from "components/alert";
 import UpdateNotification from "components/UpdateNotification";
+import { ErrorModalContextProvider } from "components/errorModalContext";
+import ErrorModal from "components/errorModal";
 
 export default function RootLayout() {
     const stored = localStorage.getItem("isDark")?.toLocaleLowerCase();
@@ -24,21 +26,24 @@ export default function RootLayout() {
 
     return (
         <AppContextProvider>
-            <AlertContextProvider>
-                <Alert />
-                <Spinner />
-                <UpdateNotification />
-                <div className="bg-slate-50 dark:bg-gray-950 flex flex-col-reverse md:flex-col min-h-screen">
-                    <Header
-                        themeChanged={changeTheme}
-                        isDark={isDark}
-                    />
-                    <div className={`max-w-5xl p-1 md:p-2 mx-auto w-full flex-1
+            <ErrorModalContextProvider>
+                <AlertContextProvider>
+                    <Alert />
+                    <ErrorModal />
+                    <Spinner />
+                    <UpdateNotification />
+                    <div className="bg-slate-50 dark:bg-gray-950 flex flex-col-reverse md:flex-col min-h-screen">
+                        <Header
+                            themeChanged={changeTheme}
+                            isDark={isDark}
+                        />
+                        <div className={`max-w-5xl p-1 md:p-2 mx-auto w-full flex-1
                           text-slate-800 dark:text-slate-200`}>
-                        <Outlet />
+                            <Outlet />
+                        </div>
                     </div>
-                </div>
-            </AlertContextProvider>
+                </AlertContextProvider>
+            </ErrorModalContextProvider>
         </AppContextProvider>
     );
 }

@@ -1,10 +1,12 @@
 import { RouterNavigateOptions, To } from "react-router-dom";
+import { IErrorDetails } from "./errorModalContext";
 
 interface IHookHack {
     navigate: (to: To | null, opts?: RouterNavigateOptions) => Promise<void>;
     login: (user: ICurrentUser) => void,
     logout: () => void,
     hostname: string,
+    showError: (error: IErrorDetails) => void,
 }
 
 export const hookHack: IHookHack = {
@@ -12,4 +14,5 @@ export const hookHack: IHookHack = {
     logout: () => { throw new Error("not set yet"); },
     login: () => { throw new Error("not set yet"); },
     hostname: window.location.hostname,
+    showError: () => { throw new Error("not set yet"); },
 };
