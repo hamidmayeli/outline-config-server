@@ -1,5 +1,4 @@
 import { RouterNavigateOptions, To } from "react-router-dom";
-import { IErrorDetails } from "./errorModalContext";
 
 interface IHookHack {
     navigate: (to: To | null, opts?: RouterNavigateOptions) => Promise<void>;

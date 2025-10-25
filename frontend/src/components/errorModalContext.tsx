@@ -1,13 +1,6 @@
 import { createContext, useCallback, useMemo, useState } from "react";
 import { hookHack } from "./hookHack";
 
-export interface IErrorDetails {
-    message: string;
-    details?: string;
-    statusCode?: number;
-    url?: string;
-}
-
 export const ErrorModalContext = createContext<{
     error: IErrorDetails | null;
     showError: (error: IErrorDetails) => void;
