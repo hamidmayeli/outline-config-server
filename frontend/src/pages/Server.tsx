@@ -172,83 +172,88 @@ export default function Server() {
         return (
             <>
                 <ServerName serverInfo={serverInfo} />
-                <div className="flex gap-5 mb-5">
-                    <div className="boxed-area text-center grow">{getTotalUsage()}</div>
-                    <div className="boxed-area text-center grow">{keys.length} Keys</div>
-                    <Link to={`/usage/${serverId}`} className="boxed-area text-center grow bg-blue-500 hover:bg-blue-600 text-white font-semibold transition-colors flex items-center justify-center gap-2" title="View Usage Chart">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
-                            <path d="M11 2v9.5c0 .3.2.5.5.5H21c0 4.4-3.6 8-8 8s-8-3.6-8-8 3.6-8 8-8z"/>
-                            <path d="M13 2c4.4 0 8 3.6 8 8h-8V2z" opacity="0.7"/>
-                        </svg>
-                    </Link>
-                </div>
 
-                {/* Sort Header */}
-                <div className="flex boxed-area mb-2 items-center bg-gray-100 dark:bg-gray-800 font-semibold">
-                    <div className="w-1/3">
-                        <button 
-                            className="text-left hover:bg-gray-200 dark:hover:bg-gray-700 px-2 py-1 rounded flex items-center gap-1"
-                            onClick={() => handleSort('name')}
-                        >
-                            Name
-                            {sortCriteria === 'name' && (
-                                <span className="text-xs">
-                                    {sortDirection === 'asc' ? '↑' : '↓'}
-                                </span>
-                            )}
-                        </button>
+                <div className="flex flex-col-reverse md:flex-col">
+                    <div className="flex gap-5 mb-5 sticky bottom-24 bg-slate-50 dark:bg-gray-950 py-1">
+                        <div className="boxed-area text-center grow">{getTotalUsage()}</div>
+                        <div className="boxed-area text-center grow">{keys.length} Keys</div>
+                        <Link to={`/usage/${serverId}`} className="boxed-area text-center grow bg-blue-500 hover:bg-blue-600 text-white font-semibold transition-colors flex items-center justify-center gap-2" title="View Usage Chart">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
+                                <path d="M11 2v9.5c0 .3.2.5.5.5H21c0 4.4-3.6 8-8 8s-8-3.6-8-8 3.6-8 8-8z"/>
+                                <path d="M13 2c4.4 0 8 3.6 8 8h-8V2z" opacity="0.7"/>
+                            </svg>
+                        </Link>
                     </div>
-                    <div className="grow">
-                        <button 
-                            className="text-left hover:bg-gray-200 dark:hover:bg-gray-700 px-2 py-1 rounded flex items-center gap-1"
-                            onClick={() => handleSort('consumed')}
-                        >
-                            Usage
-                            {sortCriteria === 'consumed' && (
-                                <span className="text-xs">
-                                    {sortDirection === 'asc' ? '↑' : '↓'}
-                                </span>
-                            )}
-                        </button>
-                        <button 
-                            className="text-left hover:bg-gray-200 dark:hover:bg-gray-700 px-2 py-1 rounded flex items-center gap-1 ml-4"
-                            onClick={() => handleSort('limit')}
-                        >
-                            Limit
-                            {sortCriteria === 'limit' && (
-                                <span className="text-xs">
-                                    {sortDirection === 'asc' ? '↑' : '↓'}
-                                </span>
-                            )}
-                        </button>
-                    </div>
-                    <div className="flex flex-col gap-1 w-20">
-                        Actions
+
+                    <div>
+                        {/* Sort Header */}
+                        <div className="flex boxed-area mb-2 items-center bg-gray-100 dark:bg-gray-800 font-semibold">
+                            <div className="w-1/3">
+                                <button 
+                                    className="text-left hover:bg-gray-200 dark:hover:bg-gray-700 px-2 py-1 rounded flex items-center gap-1"
+                                    onClick={() => handleSort('name')}
+                                >
+                                    Name
+                                    {sortCriteria === 'name' && (
+                                        <span className="text-xs">
+                                            {sortDirection === 'asc' ? '↑' : '↓'}
+                                        </span>
+                                    )}
+                                </button>
+                            </div>
+                            <div className="grow">
+                                <button 
+                                    className="text-left hover:bg-gray-200 dark:hover:bg-gray-700 px-2 py-1 rounded flex items-center gap-1"
+                                    onClick={() => handleSort('consumed')}
+                                >
+                                    Usage
+                                    {sortCriteria === 'consumed' && (
+                                        <span className="text-xs">
+                                            {sortDirection === 'asc' ? '↑' : '↓'}
+                                        </span>
+                                    )}
+                                </button>
+                                <button 
+                                    className="text-left hover:bg-gray-200 dark:hover:bg-gray-700 px-2 py-1 rounded flex items-center gap-1 ml-4"
+                                    onClick={() => handleSort('limit')}
+                                >
+                                    Limit
+                                    {sortCriteria === 'limit' && (
+                                        <span className="text-xs">
+                                            {sortDirection === 'asc' ? '↑' : '↓'}
+                                        </span>
+                                    )}
+                                </button>
+                            </div>
+                            <div className="flex flex-col gap-1 w-20">
+                                Actions
+                            </div>
+                        </div>
+
+                        {getSortedKeys().map(key => (<div key={key.id} className="flex boxed-area mb-2 items-center">
+                            <div className="w-1/3" onClick={() => selectForUpdate(key)}>{key.name}</div>
+                            <div className="grow">
+                                <span>{toHumanReadableBytes(key.dataLimit.consumed)}</span>{key.dataLimit.bytes ? (<span> / {toHumanReadableBytes(key.dataLimit.bytes)}</span>) : null}
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <button className="btn w-20"
+                                    onClick={() => copyToClipboard(`${key.accessUrl}#${encodeURIComponent(key.name + " - " + serverInfo.name)}`)}>
+                                    Url
+                                </button>
+                                <button className="btn w-20"
+                                    onClick={() => deleteKey(key.id)}>
+                                    {deleteConfirmed.indexOf(key.id) >= 0 ? "Delete" : "X"}
+                                </button>
+                                {key.configUrl ? (
+                                    <button className="btn w-20"
+                                        onClick={() => copyToClipboard(key.configUrl!)}>
+                                        Config
+                                    </button>
+                                ) : null}
+                            </div>
+                        </div>))}
                     </div>
                 </div>
-
-                {getSortedKeys().map(key => (<div key={key.id} className="flex boxed-area mb-2 items-center">
-                    <div className="w-1/3" onClick={() => selectForUpdate(key)}>{key.name}</div>
-                    <div className="grow">
-                        <span>{toHumanReadableBytes(key.dataLimit.consumed)}</span>{key.dataLimit.bytes ? (<span> / {toHumanReadableBytes(key.dataLimit.bytes)}</span>) : null}
-                    </div>
-                    <div className="flex flex-col gap-1">
-                        <button className="btn w-20"
-                            onClick={() => copyToClipboard(`${key.accessUrl}#${encodeURIComponent(key.name + " - " + serverInfo.name)}`)}>
-                            Url
-                        </button>
-                        <button className="btn w-20"
-                            onClick={() => deleteKey(key.id)}>
-                            {deleteConfirmed.indexOf(key.id) >= 0 ? "Delete" : "X"}
-                        </button>
-                        {key.configUrl ? (
-                            <button className="btn w-20"
-                                onClick={() => copyToClipboard(key.configUrl!)}>
-                                Config
-                            </button>
-                        ) : null}
-                    </div>
-                </div>))}
 
                 <div className="boxed-area mb-2 items-center">
                     <p>Add or update keys: {updatingKeyId ? `(Updating "${getUpdatingKeyName()}")` : "(Adding a new key)"}</p>
