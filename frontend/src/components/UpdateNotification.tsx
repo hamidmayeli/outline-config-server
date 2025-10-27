@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
+import { useLocation } from 'react-router-dom';
 
 export default function UpdateNotification() {
   const [showReload, setShowReload] = useState(false);
+  const location = useLocation();
   
   const {
     offlineReady: [offlineReady, setOfflineReady],
@@ -22,6 +24,33 @@ export default function UpdateNotification() {
       setShowReload(true);
     }
   }, [needRefresh]);
+
+  // Check for updates when page becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('Page is visible, checking for updates...');
+        // Trigger SW update check by dispatching a custom event
+        navigator.serviceWorker?.getRegistration().then((registration) => {
+          registration?.update();
+        });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  // Check for updates on route changes
+  useEffect(() => {
+    console.log('Route changed, checking for updates...');
+    navigator.serviceWorker?.getRegistration().then((registration) => {
+      registration?.update();
+    });
+  }, [location.pathname]);
 
   const close = () => {
     setOfflineReady(false);
