@@ -153,7 +153,6 @@ class BaseAPI {
                         try {
                             hookHack.showError({
                                 message: errorMessage,
-                                statusCode: 0,
                                 url: url,
                                 details: error.message,
                             });
