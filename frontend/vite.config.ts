@@ -1,31 +1,45 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import istanbul from 'vite-plugin-istanbul';
 import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  build: {
-    sourcemap: true,
-  },
-  plugins: [
-    react(),
-    tsconfigPaths(),
-    istanbul({
-      include: 'src/*',
-      exclude: ['node_modules'],
-      extension: [ '.js', '.ts', '.jsx', '.tsx',  ],
-      requireEnv: !process.env.CYPRESS,
-      checkProd: true,
-    }),
-    VitePWA({ 
-      registerType: 'prompt',
-      injectRegister: 'auto',
-      workbox:{
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,woff,woff2,ttf}']
-      },
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg', 'logo192.png', 'logo512.png'],
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  const apiHost = env.VITE_API_HOST || '/api';
+  
+  // Escape special regex characters and create pattern for runtime API calls
+  const escapedApiHost = apiHost.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const apiPattern = new RegExp(`${escapedApiHost}/`, 'i');
+
+  return {
+    build: {
+      sourcemap: true,
+    },
+    plugins: [
+      react(),
+      tsconfigPaths(),
+      istanbul({
+        include: 'src/*',
+        exclude: ['node_modules'],
+        extension: [ '.js', '.ts', '.jsx', '.tsx',  ],
+        requireEnv: !process.env.CYPRESS,
+        checkProd: true,
+      }),
+      VitePWA({ 
+        registerType: 'prompt',
+        injectRegister: 'auto',
+        workbox:{
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,json,woff,woff2,ttf}'],
+          runtimeCaching: [
+            {
+              urlPattern: apiPattern,
+              handler: 'NetworkOnly',
+            },
+          ],
+        },
+        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg', 'logo192.png', 'logo512.png'],
       manifestFilename: "manifest.json",
       manifest: {
         name: 'Outline Manager',
@@ -46,5 +60,6 @@ export default defineConfig({
         ]
       }
      }),
-  ],
-})
+    ],
+  };
+});
