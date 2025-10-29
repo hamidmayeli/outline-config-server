@@ -9,6 +9,7 @@ export default function LoginPage() {
     const { login } = useContext(AppContext);
 
     const [formData, setFormData] = useState<{ username?: string, password?: string }>({});
+    const [clearing, setClearing] = useState(false);
 
     const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
         const { name: theName, value: newValue } = evt.target;
@@ -36,6 +37,33 @@ export default function LoginPage() {
         }
     }
 
+    const clearAllCaches = async () => {
+        if (!confirm('This will clear all cached data and reload the page. Continue?')) {
+            return;
+        }
+
+        setClearing(true);
+        
+        try {
+            // Clear all caches
+            const cacheNames = await caches.keys();
+            await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+            
+            // Unregister service workers
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(registrations.map(registration => registration.unregister()));
+            }
+            
+            alert('All caches cleared! The page will now reload.');
+            window.location.reload();
+        } catch (error) {
+            console.error('Error clearing caches:', error);
+            alert('Failed to clear caches. Please try again.');
+            setClearing(false);
+        }
+    }
+
     return (
         <section className="flex h-full">
             <div className="mx-auto p-10 flex flex-col grow-0 max-w-md">
@@ -60,6 +88,15 @@ export default function LoginPage() {
 
                 <button type="button" className="my-3 btn" onClick={doLogin}>
                     Login
+                </button>
+
+                <button 
+                    type="button" 
+                    className="mt-2 px-3 py-1 rounded-sm bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm"
+                    onClick={clearAllCaches}
+                    disabled={clearing}
+                >
+                    {clearing ? 'Clearing...' : 'Clear All Caches'}
                 </button>
             </div>
         </section>
