@@ -15,6 +15,7 @@ export default function Report() {
     const [detailsDataKeys, setDetailsDataKeys] = useState<Record<string, string[]>>({});
     const [oldLogs, setOldLogs] = useState(30);
     const [loadCount, reload] = useState(1);
+    const [hiddenKeys, setHiddenKeys] = useState<Record<string, Set<string>>>({ main: new Set() });
 
     const isDark = () => document.body.classList.contains("dark");
 
@@ -138,12 +139,33 @@ export default function Report() {
             .catch(err => console.error(err));
     };
 
-    const Chart = ({ chartData, theKeys }: { chartData: IChartData[], theKeys: string[] }) => {
+    const Chart = ({ chartData, theKeys, chartId = 'main' }: { chartData: IChartData[], theKeys: string[], chartId?: string }) => {
+        const handleLegendClick = (dataKey: string) => {
+            setHiddenKeys(prev => {
+                const newHidden = { ...prev };
+                if (!newHidden[chartId]) {
+                    newHidden[chartId] = new Set();
+                }
+                const chartHidden = new Set(newHidden[chartId]);
+                
+                if (chartHidden.has(dataKey)) {
+                    chartHidden.delete(dataKey);
+                } else {
+                    chartHidden.add(dataKey);
+                }
+                
+                newHidden[chartId] = chartHidden;
+                return newHidden;
+            });
+        };
+
+        const visibleKeys = theKeys.filter(key => !hiddenKeys[chartId]?.has(key));
+
         return (
             <div style={{ height: "calc(100vh - 70px)" }} className="pr-5">
                 <ResponsiveContainer>
                     <LineChart data={chartData}>
-                        {theKeys.map((key, index) => (
+                        {visibleKeys.map((key, index) => (
                             <Line
                                 key={index}
                                 type="monotone"
@@ -155,7 +177,7 @@ export default function Report() {
                         <XAxis dataKey="date" tickFormatter={formatXAxis} />
                         <YAxis tickFormatter={formatYAxis} />
                         <Tooltip formatter={formatTooltip} />
-                        <Legend />
+                        <Legend onClick={(e) => e.dataKey && handleLegendClick(e.dataKey as string)} wrapperStyle={{ cursor: 'pointer' }} />
                         <Brush dataKey="date" height={30} stroke="#4d78f7" startIndex={chartData.length > 24 ? chartData.length - 24 : 0} />
                     </LineChart>
                 </ResponsiveContainer>
@@ -179,9 +201,9 @@ export default function Report() {
                 </div>
             </div>
             {serverNames.map(x => (
-                <div className="pb-20">
+                <div key={x} className="pb-20">
                     <div className="text-center text-xl pb-5">{x}</div>
-                    <Chart key={x} chartData={detailsData[x]} theKeys={detailsDataKeys[x]} />
+                    <Chart chartData={detailsData[x]} theKeys={detailsDataKeys[x]} chartId={x} />
                 </div>
             ))}
         </div>
