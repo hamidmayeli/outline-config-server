@@ -1,6 +1,6 @@
 {
-  "name": "Outline Config Server - Backend (C# .NET 9)",
-  "image": "mcr.microsoft.com/devcontainers/dotnet:9.0",
+  "name": "Outline Config Server - Backend",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:10.0",
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
   
   "mounts": [
