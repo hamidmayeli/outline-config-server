@@ -8,7 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers;
 
 public class ConfigController(
-    ILocalKeyService _localKeyService
+    ILocalKeyService _localKeyService,
+    IServerService _serverService
     ) : ApiController
 {
     [HttpGet("{keyId}")]
@@ -45,6 +46,13 @@ public class ConfigController(
     public async Task<NoContent> Update()
     {
         await _localKeyService.UpdateDomain();
+        return TypedResults.NoContent();
+    }
+
+    [HttpPut("switch-server/{targetServerId}")]
+    public async Task<NoContent> SwitchTargetServer(Guid targetServerId)
+    {
+        await _serverService.UpdateTargetServer(UserId, targetServerId);
         return TypedResults.NoContent();
     }
 }

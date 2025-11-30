@@ -1,4 +1,5 @@
 ﻿using API.Models;
+using NSubstitute;
 using Shouldly;
 using System.Net;
 using System.Net.Http.Json;
@@ -9,6 +10,7 @@ internal class UserIntractsWithConfigs : TestCaseBase
 {
     private HttpClient _client = default!;
     private LocalKey _locakKey = default!;
+    private UserModel _user = default!;
 
     private LiteDB.ILiteCollection<LocalKey> LocalKeys => _fixture.LiteDatabase.GetCollection<LocalKey>();
 
@@ -16,8 +18,8 @@ internal class UserIntractsWithConfigs : TestCaseBase
     {
         await base.Setup();
 
-        var user = await _fixture.CreateUser("user", "PasswordPassword");
-        _client = await _fixture.GetHttpClient(user);
+        _user = await _fixture.CreateUser("user", "PasswordPassword");
+        _client = await _fixture.GetHttpClient(_user);
 
         _locakKey = new LocalKey
         {
@@ -107,5 +109,43 @@ internal class UserIntractsWithConfigs : TestCaseBase
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
         LocalKeys.Count().ShouldBe(0);
+    }
+
+    [Test]
+    public async Task UserCanUpdateConfigTargetingNewServer()
+    {
+        // Arrange
+        var server = CreateServer(Guid.NewGuid());
+
+        _user.Servers.Add(server);
+        _fixture.Users.Update(_user);
+        _fixture.OutlineServerClient
+            .GetAccessKey(server.ApiPrefix)
+            .Returns(new AccessKeyCollectionResponse(
+                [
+                    new ("1", "key-1", "ss://access.new", null)
+                ]
+            ));
+
+        var locakKey = new LocalKey
+        {
+            AccessKey = "ss://access.old",
+            ConfigUrl = "http://config.url",
+            Name = "key-1-Cfg",
+            Id = Guid.NewGuid(),
+        };
+
+        LocalKeys.Insert(locakKey);
+
+        // Act
+        var response = await _client.PutAsync($"/api/v1/config/switch-server/{server.ServerId}", null);
+        
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
+
+        var configResponse = await _client.GetAsync($"/api/v1/config/{locakKey.Id}");
+        configResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var key = await configResponse.Content.ReadAsStringAsync();
+        key.ShouldBe("ss://access.new");
     }
 }

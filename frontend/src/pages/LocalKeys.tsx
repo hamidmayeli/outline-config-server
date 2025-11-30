@@ -8,6 +8,8 @@ export default function Server() {
     const [lastLoaded, setLastLoaded] = useState(Date.now);
     const [formData, setFormData] = useState<{ name?: string, accessKey?: string, id?: string, configUrl: string }>({ configUrl: "" });
     const [deleteConfirmed, setDeleteConfirmed] = useState<string[]>([]);
+    const [servers, setServers] = useState<IServerDto[]>([]);
+    const [selectedServerId, setSelectedServerId] = useState<string>("");
 
     const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = evt.target;
@@ -33,6 +35,17 @@ export default function Server() {
                     setKeys(keys);
                 }
                 setLoading(false);
+            })
+            .catch(err => console.error(err));
+
+        baseApi.getApi<IServerDto[]>("/v1/server")
+            .then(servers => {
+                if (servers) {
+                    setServers(servers);
+                    if (servers.length > 0) {
+                        setSelectedServerId(servers[0].id);
+                    }
+                }
             })
             .catch(err => console.error(err));
     }, [lastLoaded]);
@@ -94,6 +107,20 @@ export default function Server() {
             .catch(err => console.error(err));
     };
 
+    const switchServer = () => {
+        if (selectedServerId) {
+            baseApi.putApi(`/v1/config/switch-server/${selectedServerId}`)
+                .then(() => {
+                    alert("Server switched successfully");
+                    startTransition(() => {
+                        setLastLoaded(Date.now);
+                        setLoading(true);
+                    });
+                })
+                .catch(err => console.error(err));
+        }
+    };
+
     if (!loading)
         return (
             <>
@@ -151,7 +178,21 @@ export default function Server() {
                 </div>
 
                 <div className="boxed-area mb-2 items-center">
-                    <button className="btn" onClick={updateDomain}>Update the domain of the configs</button>
+                    <div className="flex gap-2 items-center">
+                        <button className="btn" onClick={updateDomain}>Update the domain of the configs</button>
+                        <select 
+                            className="border border-gray-300 rounded px-3 py-2"
+                            value={selectedServerId}
+                            onChange={(e) => setSelectedServerId(e.target.value)}
+                        >
+                            {servers.map(server => (
+                                <option key={server.id} value={server.id}>
+                                    {server.name}
+                                </option>
+                            ))}
+                        </select>
+                        <button className="btn" onClick={switchServer}>Switch Server</button>
+                    </div>
                 </div>
             </>
         );

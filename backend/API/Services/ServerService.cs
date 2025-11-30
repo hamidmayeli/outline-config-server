@@ -13,6 +13,7 @@ public interface IServerService
     Task<IEnumerable<AccessKeyResponse>> GetAccessKeys(int userId, Guid serverId);
     Task<IEnumerable<ServerDto>> GetAll(int userId);
     Task UpdateName(int userId, Guid id, string name);
+    Task UpdateTargetServer(int userId, Guid targetServerId);
 }
 
 public class ServerService(
@@ -125,6 +126,46 @@ public class ServerService(
 
         server.Name = name;
         Users.Update(user);
+    }
+
+    public async Task UpdateTargetServer(int userId, Guid targetServerId)
+    {
+        _logger.LogInformation("Updating local keys to {target}", targetServerId);
+
+        var localKeys = await _localKeyService.GetAll();
+
+        if (!localKeys.Any())
+        {
+            _logger.LogInformation("No local keys to update");
+            return;
+        }
+
+        var targetKeys = await GetAccessKeys(userId, targetServerId);
+
+        _logger.LogDebug("Loaded {targetCount} target keys", targetKeys.Count());
+
+        var targetKeyDict = targetKeys.ToDictionary(x => x.Name + "-Cfg");
+
+        var updatedCount = 0;
+
+        foreach (var localKey in localKeys)
+        {
+            if (targetKeyDict.TryGetValue(localKey.Name, out var targetKey))
+            {
+                localKey.AccessKey = targetKey.AccessUrl;
+                await _localKeyService.Upsert(localKey);
+                updatedCount++;
+
+                _logger.LogDebug("Updated local key '{name}' to {target}", localKey.Name, targetKey.Name);
+            }
+            else
+            {
+                _logger.LogWarning("Target server does not have match for '{name}'", localKey.Name);
+            }
+        }
+
+        _logger.LogInformation("Updated {count} local keys to target server {serverId}",
+            updatedCount, targetServerId);
     }
 
     private async Task<ServerInfo?> GetServerInfo(ServerModel server)
