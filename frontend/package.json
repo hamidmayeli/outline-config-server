@@ -10,19 +10,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^19.2.1",
-    "react-dom": "^19.2.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "react-router-dom": "^7.10.1",
     "recharts": "^3.5.1"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.1.0",
-    "@tailwindcss/postcss": "^4.1.17",
+    "@tailwindcss/postcss": "^4.1.18",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "@typescript-eslint/eslint-plugin": "^8.48.1",
+    "@typescript-eslint/eslint-plugin": "^8.49.0",
     "@typescript-eslint/parser": "^8.45.0",
-    "@vitejs/plugin-react": "^5.1.1",
+    "@vitejs/plugin-react": "^5.1.2",
     "concurrently": "^9.2.1",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
@@ -31,7 +31,7 @@
     "postcss": "^8.5.5",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.9.3",
-    "vite": "^7.2.6",
+    "vite": "^7.2.7",
     "vite-plugin-pwa": "^1.2.0",
     "vite-tsconfig-paths": "^5.1.4"
   }
