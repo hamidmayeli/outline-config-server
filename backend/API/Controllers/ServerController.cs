@@ -57,4 +57,12 @@ public class ServerController(
 
         return TypedResults.NoContent();
     }
+
+    [HttpPut("{id}/host")]
+    public async Task<NoContent> SetHost(Guid id)
+    {
+        await _serverService.SetHost(UserId, id);
+
+        return TypedResults.NoContent();
+    }
 }

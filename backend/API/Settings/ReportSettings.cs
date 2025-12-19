@@ -4,4 +4,5 @@ public class ReportSettings
 {
     public int IntervalMinutes { get; set; }
     public required string LogFileFolders { get; set; }
+    public required string HourlyLogFileFolders { get; set; }
 }
