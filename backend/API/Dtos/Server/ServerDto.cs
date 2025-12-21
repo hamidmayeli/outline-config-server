@@ -1,3 +1,3 @@
 ﻿namespace API.Dtos.Server;
 
-public record ServerDto(Guid Id, string Name);
+public record ServerDto(Guid Id, string Name, bool IsHost);

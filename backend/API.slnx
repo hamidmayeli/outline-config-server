@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Solution>
+  <Project Path="API\API.csproj" Type="Classic C#" />
+  <Project Path="API.Tests\API.Tests.csproj" Type="Classic C#" />
+</Solution>

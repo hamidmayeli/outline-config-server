@@ -24,6 +24,7 @@ const App = lazyRetry(() => import('pages/App'));
 const NewServer = lazyRetry(() => import('pages/NewServer'));
 const LocalKeys = lazyRetry(() => import('pages/LocalKeys'));
 const Report = lazyRetry(() => import('pages/Report'));
+const HourlyReport = lazyRetry(() => import('pages/HourlyReport'));
 const Usage = lazyRetry(() => import('pages/Usage'));
 
 const router = createBrowserRouter([
@@ -58,6 +59,10 @@ const router = createBrowserRouter([
         {
           path: "report",
           element: <Protected><Report /></Protected>,
+        },
+        {
+          path: "hourly-report",
+          element: <Protected><HourlyReport /></Protected>,
         },
       ]
     }

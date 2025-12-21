@@ -114,7 +114,7 @@ public class ServerService(
     }
 
     public Task<IEnumerable<ServerDto>> GetAll(int userId)
-        => Task.FromResult(_database.GetUser(userId).Servers.Select(x => new ServerDto(x.ServerId, x.Name)));
+        => Task.FromResult(_database.GetUser(userId).Servers.Select(x => new ServerDto(x.ServerId, x.Name, x.IsHost)));
 
     public async Task UpdateName(int userId, Guid id, string name)
     {

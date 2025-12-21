@@ -11,6 +11,7 @@ interface IServerInfo {
 interface IServerDto {
     id: string;
     name: string;
+    isHost: boolean;
 }
 
 interface IAccessKeyResponse {
