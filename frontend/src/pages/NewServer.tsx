@@ -14,7 +14,7 @@ export default function NewServer() {
         baseApi.getApi<IServerDto[]>("/v1/server")
             .then(data => {
                 data = data ?? [];
-                data = [{id: emptyGuid, name: "Nothing"}, ...data]
+                data = [{id: emptyGuid, name: "Nothing", isHost: false}, ...data]
                 setServers(data);
             })
             .catch(err => console.error(err));
