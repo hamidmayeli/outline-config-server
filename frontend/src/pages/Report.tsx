@@ -123,8 +123,9 @@ export default function Report() {
 
     const formatYAxis = (tickItem: number) => toHumanReadableBytes(tickItem) ?? "";
 
-    const formatTooltip = (value: number, name: string) => {
-        return [toHumanReadableBytes(value), name];
+    const formatTooltip = (value: number | undefined, name: string | undefined) => {
+        if (value === undefined) return ["", name ?? ""];
+        return [toHumanReadableBytes(value), name ?? ""];
     };
 
     const createALog = () => {

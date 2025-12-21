@@ -14,6 +14,10 @@ public class ReportController(
     public async Task<Ok<IEnumerable<UsageSnapshot>>> Get(int count = 30)
         => TypedResults.Ok(await _reportService.Get(count));
 
+    [HttpGet("hourly")]
+    public async Task<Ok<IEnumerable<HourlyUsage>>> GetHourly(int count = 30 * 24)
+        => TypedResults.Ok(await _reportService.GetHourly(count));
+
     [HttpPut]
     public async Task<NoContent> Create()
     {

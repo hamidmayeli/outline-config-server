@@ -14,6 +14,7 @@ public interface IServerService
     Task<IEnumerable<ServerDto>> GetAll(int userId);
     Task UpdateName(int userId, Guid id, string name);
     Task UpdateTargetServer(int userId, Guid targetServerId);
+    Task SetHost(int userId, Guid serverId);
 }
 
 public class ServerService(
@@ -21,7 +22,8 @@ public class ServerService(
     ILogger<ServerService> _logger,
     IOutlineServerClientFactory _outlineClientFactory,
     IKeyService _keyService,
-    ILocalKeyService _localKeyService
+    ILocalKeyService _localKeyService,
+    IReportService _reportService
     ) : IServerService
 {
     private ILiteCollection<UserModel> Users => _database.GetCollection<UserModel>();
@@ -112,7 +114,7 @@ public class ServerService(
     }
 
     public Task<IEnumerable<ServerDto>> GetAll(int userId)
-        => Task.FromResult(_database.GetUser(userId).Servers.Select(x => new ServerDto(x.ServerId, x.Name)));
+        => Task.FromResult(_database.GetUser(userId).Servers.Select(x => new ServerDto(x.ServerId, x.Name, x.IsHost)));
 
     public async Task UpdateName(int userId, Guid id, string name)
     {
@@ -166,6 +168,29 @@ public class ServerService(
 
         _logger.LogInformation("Updated {count} local keys to target server {serverId}",
             updatedCount, targetServerId);
+    }
+
+    public async Task SetHost(int userId, Guid serverId)
+    {
+        _logger.LogInformation("Setting server {serverId} as host for user {userId}", serverId, userId);
+
+        var user = _database.GetUser(userId);
+        var server = user.GetServer(serverId);
+
+        // Clear IsHost from all servers
+        foreach (var s in user.Servers)
+        {
+            s.IsHost = false;
+        }
+
+        // Set the target server as host
+        server.IsHost = true;
+        Users.Update(user);
+
+        // Clear hourly logs
+        await _reportService.ClearHourlyLogs();
+
+        _logger.LogInformation("Server {serverId} set as host and hourly logs cleared", serverId);
     }
 
     private async Task<ServerInfo?> GetServerInfo(ServerModel server)

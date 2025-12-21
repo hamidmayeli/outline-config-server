@@ -10,6 +10,8 @@ public record ServerModel
 
     public string Name { get; set; } = "No name";
 
+    public bool IsHost { get; set; } = false;
+
     public string ApiPrefix => new Uri(ApiUrl).PathAndQuery.Trim('/');
 }
 

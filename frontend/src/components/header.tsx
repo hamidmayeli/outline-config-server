@@ -26,6 +26,7 @@ export default function Header({
         <div className="flex justify-center items-center shrink-0 gap-2">
           <Link to="/" ><Logo className="h-24 p-6" /></Link>
           <Link to="/report" className="h-24 px-2 text-lg/24"><span>Report</span></Link>
+          <Link to="/hourly-report" className="h-24 px-2 text-lg/24"><span>Hourly</span></Link>
         </div>
 
         <div className="p-2 w-full">

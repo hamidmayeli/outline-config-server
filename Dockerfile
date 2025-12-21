@@ -11,7 +11,7 @@ RUN dotnet dev-certs https --trust
 
 WORKDIR /sln
 
-COPY ./backend/API.sln ./
+COPY ./backend/API.slnx ./
 COPY ./backend/API/*.csproj ./API/
 COPY ./backend/API.Tests/*.csproj ./API.Tests/
 
@@ -26,7 +26,7 @@ RUN dotnet publish ./API/API.csproj -c Release -o /app/publish
 
 FROM build AS test-api
 WORKDIR /sln
-RUN dotnet test ./API.sln
+RUN dotnet test ./API.slnx
 
 # ============== Build Client  ============== 
 FROM node:22.11.0-slim AS build-client
