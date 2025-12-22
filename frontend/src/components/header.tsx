@@ -22,9 +22,9 @@ export default function Header({
     <header className="border-b-gray-500 bg-sky-100 dark:bg-gray-900 text-gray-800
       dark:text-slate-200 shadow dark:shadow-slate-800 z-40 
       sticky bottom-0 md:top-0">
-      <nav className="flex max-w-5xl mx-auto h-full justify-center items-center">
+      <nav className="flex max-w-5xl mx-auto h-full justify-center items-center px-2">
         <div className="flex justify-center items-center shrink-0 gap-2">
-          <Link to="/" ><Logo className="h-24 p-6" /></Link>
+          <Link to="/" ><Logo className="h-24 py-6" /></Link>
           <Link to="/report" className="h-24 px-2 text-lg/24"><span>Report</span></Link>
           <Link to="/hourly-report" className="h-24 px-2 text-lg/24"><span>Hourly</span></Link>
         </div>
@@ -36,7 +36,7 @@ export default function Header({
           {currentUser ? (<button onClick={() => logout()} className="h-24 text-lg">Logout</button>) : null}
           <svg id="theme-toggle" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
             onClick={() => toggle()}
-            className="h-24 p-6 stroke-sky-900 dark:stroke-orange-500 cursor-pointer"
+            className="h-24 py-6 stroke-sky-900 dark:stroke-orange-500 cursor-pointer"
             onKeyDown={(event) => toggle(event.key !== "Enter")}
             tabIndex={0}
           >
