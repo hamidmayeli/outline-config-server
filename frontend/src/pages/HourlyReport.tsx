@@ -10,8 +10,9 @@ export default function HourlyReport() {
 
     const [data, setData] = useState<IChartData[]>([]);
     const [dataKeys, setDataKeys] = useState<string[]>([]);
+    const [totalData, setTotalData] = useState<{ date: string; total: number }[]>([]);
     const [count, setCount] = useState(720);
-    const [loadCount, reload] = useState(1);
+    const [iranTime, setIranTime] = useState(true);
     const [hiddenKeys, setHiddenKeys] = useState<Set<string>>(new Set());
 
     const isDark = () => document.body.classList.contains("dark");
@@ -21,19 +22,36 @@ export default function HourlyReport() {
             .then(response => {
                 const temp = convertToChartData(response ?? []);
                 const tempKeys = Array.from(new Set(temp.flatMap(Object.keys))).filter(key => key !== 'date').sort();
+                
+                // Calculate total usage for each time point
+                const tempTotal = temp.map(item => {
+                    const total = tempKeys.reduce((sum, key) => {
+                        const value = item[key];
+                        return sum + (typeof value === 'number' ? value : 0);
+                    }, 0);
+                    return { date: item.date, total };
+                });
 
                 startTransition(() => {
                     setData(temp);
                     setDataKeys(tempKeys);
+                    setTotalData(tempTotal);
                 });
             })
             .catch(err => console.error(err));
-    }, [loadCount, count]);
+    }, [count, iranTime]);
 
     const convertToChartData = (hourlyUsage: IHourlyUsage[]) => {
         return hourlyUsage.map(hourly => {
+            const date = new Date(hourly.time * 1000);
+            
+            // Convert to Iran time (UTC+3:30) if checkbox is selected
+            const displayDate = iranTime 
+                ? new Date(date.getTime() + (3.5 * 60 * 60 * 1000))
+                : date;
+            
             const chartData: IChartData = {
-                date: new Date(hourly.time * 1000).toISOString()
+                date: displayDate.toISOString()
             };
 
             hourly.usage?.forEach(item => {
@@ -79,7 +97,8 @@ export default function HourlyReport() {
 
     return (
         <div className="px-2">
-            <div style={{ height: "calc(100vh - 70px)" }} className="pr-5">
+            <div style={{ height: "calc(100vh - 40px)" }} className="pr-5">
+                <h3 className="text-lg font-semibold mb-2">Usage by Server</h3>
                 <ResponsiveContainer>
                     <LineChart data={data}>
                         {visibleKeys.map((key, index) => (
@@ -99,15 +118,41 @@ export default function HourlyReport() {
                     </LineChart>
                 </ResponsiveContainer>
             </div>
+            <div style={{ height: "calc(100vh - 40px)" }} className="pr-5 mt-4">
+                <h3 className="text-lg font-semibold mb-2">Total Usage</h3>
+                <ResponsiveContainer>
+                    <LineChart data={totalData}>
+                        <Line
+                            type="monotone"
+                            dataKey="total"
+                            stroke={isDark() ? "#00ced1" : "#6a5acd"}
+                            strokeWidth={2}
+                        />
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="date" tickFormatter={formatXAxis} />
+                        <YAxis tickFormatter={formatYAxis} />
+                        <Tooltip formatter={formatTooltip} />
+                        <Brush dataKey="date" height={30} stroke="#4d78f7" startIndex={totalData.length > 24 ? totalData.length - 24 : 0} />
+                    </LineChart>
+                </ResponsiveContainer>
+            </div>
             <div className="flex gap-2 flex-col pt-10 pb-20">
-                <div className="flex gap-1">
+                <div className="flex gap-1 items-center">
                     <TextInput
                         className="grow"
                         type="number"
                         onChange={e => setCount(+e.target.value)}
                         value={count}
                     />
-                    <button className="btn grow" onClick={() => reload(loadCount + 1)}>Reload</button>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={iranTime}
+                            onChange={e => setIranTime(e.target.checked)}
+                            className="cursor-pointer"
+                        />
+                        <span>Iran Time</span>
+                    </label>
                 </div>
             </div>
         </div>
