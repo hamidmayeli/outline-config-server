@@ -6,15 +6,12 @@ const faker = new Faker({
 
   const authentication = (req, res, next) => {
     if (req.path === "/login" && req.method === "POST") {
-        if(req.body.verificationCode === 123456){
             res.jsonp({
                 id: faker.number.int(),
                 name: faker.person.fullName(),
                 avatar: faker.internet.avatar(),
                 token: "the-token",
             });
-        }
-        res.status(204).end();
     }
     else {
         next();

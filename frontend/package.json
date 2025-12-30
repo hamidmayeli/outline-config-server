@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
+    "json-server": "json-server json-server/data.cjs --middlewares json-server/middleware.cjs --routes json-server/routing.json --host 127.0.0.1 --port 5082",
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"

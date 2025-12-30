@@ -19,53 +19,80 @@ export default function HourlyReport() {
 
     const isDark = () => document.body.classList.contains("dark");
 
-    const calculateWeekComparison = (total: { date: string; total: number }[]) => {
-        if (total.length === 0) return [];
+    const calculateWeekComparison = (hourlyUsage: IHourlyUsage[]) => {
+        if (hourlyUsage.length === 0) return [];
         
-        // Get the last timestamp
-        const lastTimestamp = new Date(total[total.length - 1].date).getTime();
-        const weekInMs = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+        // Get the last Unix timestamp
+        const lastTimestamp = Math.max(...hourlyUsage.map(h => h.time));
+        const weekInSeconds = 7 * 24 * 60 * 60; // 7 days in seconds
+
+        // Calculate beginning of the week for the last timestamp
+        const beginningOfLastWeekTimestamp = lastTimestamp - weekInSeconds;
         
-        // Group data by week and hour
-        const weekData: { [weekIndex: number]: { [hour: number]: number[] } } = {};
+        // Group data by week index and position within week
+        const weekData: { [weekIndex: number]: { timestamp: number; total: number }[] } = {};
         
-        total.forEach(item => {
-            const timestamp = new Date(item.date).getTime();
-            const timeDiff = lastTimestamp - timestamp;
-            const weekIndex = Math.floor(timeDiff / weekInMs);
+        hourlyUsage.forEach(hourly => {
+            const timeDiff = lastTimestamp - hourly.time;
+            const weekIndex = Math.floor(timeDiff / weekInSeconds);
+
+            // Calculate position within the week
+            const weekStartTimestamp = beginningOfLastWeekTimestamp - (weekIndex * weekInSeconds);
+            const positionInWeek = hourly.time - weekStartTimestamp;
             
-            const date = new Date(item.date);
-            const hour = date.getHours();
+            // Calculate total usage for this time point
+            const total = hourly.usage?.reduce((sum, item) => sum + item.value, 0) || 0;
             
-            if (!weekData[weekIndex]) weekData[weekIndex] = {};
-            if (!weekData[weekIndex][hour]) weekData[weekIndex][hour] = [];
-            weekData[weekIndex][hour].push(item.total);
+            if (!weekData[weekIndex]) weekData[weekIndex] = [];
+            weekData[weekIndex].push({ timestamp: beginningOfLastWeekTimestamp + positionInWeek, total });
         });
         
         // Get sorted week indices
         const weekIndices = Object.keys(weekData).map(Number).sort((a, b) => a - b);
+        if (weekIndices.length === 0) return [];
         
-        // Calculate averages for each hour across all weeks
+        // Find the week with most data points to use as reference
+        const referenceWeekIndex = weekIndices.reduce((maxIdx, idx) => 
+            weekData[idx].length > weekData[maxIdx].length ? idx : maxIdx
+        , weekIndices[0]);
+        
+        // Sort each week's data by timestamp
+        weekIndices.forEach(idx => {
+            weekData[idx].sort((a, b) => a.timestamp - b.timestamp);
+        });
+        
+        // Create comparison data based on position in week
+        const maxLength = Math.max(...weekIndices.map(idx => weekData[idx].length));
         const comparison = [];
-        for (let hour = 0; hour < 24; hour++) {
-            const hourData: any = {
-                hour: `${String(hour).padStart(2, '0')}:00`
-            };
+        
+        for (let i = 0; i < maxLength; i++) {
+            const dataPoint: any = {};
             
+            // Use the reference week's timestamp for the x-axis
+            if (i < weekData[referenceWeekIndex].length) {
+                const refTime = weekData[referenceWeekIndex][i].timestamp;
+                const date = new Date(refTime * 1000);
+                const displayDate = iranTime 
+                    ? new Date(date.getTime() + (3.5 * 60 * 60 * 1000))
+                    : date;
+                dataPoint.time = displayDate.toISOString();
+            } else {
+                continue; // Skip if no reference data
+            }
+            
+            // Add data from each week
             weekIndices.forEach(weekIndex => {
                 const weekLabel = weekIndex === 0 ? 'Current Week' 
                     : weekIndex === 1 ? 'Last Week'
                     : `${weekIndex} Weeks Ago`;
-                    
-                const values = weekData[weekIndex][hour] || [];
-                const avg = values.length > 0 
-                    ? values.reduce((a, b) => a + b, 0) / values.length 
-                    : 0;
-                    
-                hourData[weekLabel] = avg;
+
+                const week = weekData[weekIndex];
+                const targetTimestamp = weekData[referenceWeekIndex][i].timestamp;
+                
+                dataPoint[weekLabel] = week.find(item => Math.abs(item.timestamp - targetTimestamp) < 30)?.total ?? null;
             });
             
-            comparison.push(hourData);
+            comparison.push(dataPoint);
         }
         
         return comparison;
@@ -86,10 +113,10 @@ export default function HourlyReport() {
                     return { date: item.date, total };
                 });
 
-                // Calculate week-over-week comparison
-                const tempComparison = calculateWeekComparison(tempTotal);
+                // Calculate week-over-week comparison using raw Unix time data
+                const tempComparison = calculateWeekComparison(response ?? []);
                 const tempComparisonKeys = tempComparison.length > 0 
-                    ? Object.keys(tempComparison[0]).filter(key => key !== 'hour')
+                    ? Object.keys(tempComparison[0]).filter(key => key !== 'time')
                     : [];
 
                 startTransition(() => {
@@ -180,7 +207,7 @@ export default function HourlyReport() {
                     </LineChart>
                 </ResponsiveContainer>
             </div>
-            <div style={{ height: "calc(100vh - 40px)" }} className="pr-5 mt-4">
+            <div style={{ height: "calc(100vh - 40px)" }} className="pr-5 mt-5">
                 <h3 className="text-lg font-semibold mb-2">Total Usage</h3>
                 <ResponsiveContainer>
                     <LineChart data={totalData}>
@@ -198,8 +225,8 @@ export default function HourlyReport() {
                     </LineChart>
                 </ResponsiveContainer>
             </div>
-            <div style={{ height: "calc(100vh - 40px)" }} className="pr-5 mt-4">
-                <h3 className="text-lg font-semibold mb-2">Week-over-Week Comparison (by Hour)</h3>
+            <div style={{ height: "calc(100vh - 40px)" }} className="pr-5 mt-5">
+                <h3 className="text-lg font-semibold mb-2">Week-over-Week Comparison</h3>
                 <ResponsiveContainer>
                     <LineChart data={weekComparisonData}>
                         {weekComparisonKeys.map((key, index) => (
@@ -210,13 +237,15 @@ export default function HourlyReport() {
                                 stroke={isDark() ? darkColors[index % darkColors.length] : lightColors[index % lightColors.length]}
                                 strokeWidth={2}
                                 name={key}
+                                connectNulls
                             />
                         ))}
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="hour" />
+                        <XAxis dataKey="time" tickFormatter={formatXAxis} />
                         <YAxis tickFormatter={formatYAxis} />
                         <Tooltip formatter={formatTooltip} />
                         <Legend />
+                        <Brush dataKey="time" height={30} stroke="#4d78f7" startIndex={weekComparisonData.length > 24 ? weekComparisonData.length - 24 : 0} />
                     </LineChart>
                 </ResponsiveContainer>
             </div>

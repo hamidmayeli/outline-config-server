@@ -1,4 +1,5 @@
 {
-    "/v1/user/login": "/login"
+    "/api/v1/user/login": "/login",
+    "/api/v1/report/hourly?**": "/hourlyReports"
 }
 
