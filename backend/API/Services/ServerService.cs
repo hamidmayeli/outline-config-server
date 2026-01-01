@@ -188,9 +188,9 @@ public class ServerService(
         Users.Update(user);
 
         // Clear hourly logs
-        await _reportService.ClearHourlyLogs();
+        //await _reportService.ClearHourlyLogs();
 
-        _logger.LogInformation("Server {serverId} set as host and hourly logs cleared", serverId);
+        //_logger.LogInformation("Server {serverId} set as host and hourly logs cleared", serverId);
     }
 
     private async Task<ServerInfo?> GetServerInfo(ServerModel server)
