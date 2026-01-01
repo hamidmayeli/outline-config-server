@@ -22,8 +22,7 @@ public class ServerService(
     ILogger<ServerService> _logger,
     IOutlineServerClientFactory _outlineClientFactory,
     IKeyService _keyService,
-    ILocalKeyService _localKeyService,
-    IReportService _reportService
+    ILocalKeyService _localKeyService
     ) : IServerService
 {
     private ILiteCollection<UserModel> Users => _database.GetCollection<UserModel>();
@@ -186,11 +185,6 @@ public class ServerService(
         // Set the target server as host
         server.IsHost = true;
         Users.Update(user);
-
-        // Clear hourly logs
-        //await _reportService.ClearHourlyLogs();
-
-        //_logger.LogInformation("Server {serverId} set as host and hourly logs cleared", serverId);
     }
 
     private async Task<ServerInfo?> GetServerInfo(ServerModel server)
