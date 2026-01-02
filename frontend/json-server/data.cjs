@@ -1,9 +1,3 @@
-const { Faker, fa, en, base } = require("@faker-js/faker");
-
-const faker = new Faker({
-    locale: [fa, en, base],
-  });
-
 module.exports = () => ({
     hourlyReports: [
     {
