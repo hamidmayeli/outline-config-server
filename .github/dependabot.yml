@@ -3,10 +3,7 @@ updates:
 - package-ecosystem: nuget
   directory: "/backend/"
   schedule:
-    interval: weekly
-    day: friday
-    time: "10:00"
-    timezone: Europe/London
+    interval: monthly
   groups:
     backend-group:
       patterns:
@@ -15,10 +12,7 @@ updates:
 - package-ecosystem: npm
   directory: "/frontend/"
   schedule:
-    interval: weekly
-    day: friday
-    time: "10:00"
-    timezone: Europe/London
+    interval: monthly
   groups:
     frontend-group:
       patterns:
@@ -27,15 +21,9 @@ updates:
 - package-ecosystem: devcontainers
   directory: "/backend/"
   schedule:
-    interval: weekly
-    day: friday
-    time: "10:00"
-    timezone: Europe/London
+    interval: monthly
 
 - package-ecosystem: devcontainers
   directory: "/frontend/"
   schedule:
-    interval: weekly
-    day: friday
-    time: "10:00"
-    timezone: Europe/London
+    interval: monthly
