@@ -109,13 +109,12 @@ public class ReportService(
 
     public Task ClearHourlyLogs()
     {
+        var files = new HashSet<string>(Enumerable.Range(0, 60).Select(GetFilename));
+
         if (Directory.Exists(_hourlyRootFolder))
-        {
             foreach (var file in Directory.EnumerateFiles(_hourlyRootFolder, "??????.log"))
-            {
-                File.Delete(file);
-            }
-        }
+                if (!files.Contains(file))
+                    File.Delete(file);
 
         return Task.CompletedTask;
     }

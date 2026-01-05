@@ -22,8 +22,10 @@ public class UsageLoggerService(
         try
         {
             _logger.LogDebug("Start logging usage. Remaining try: {retry}", retry);
-
             await MainLog(_database, _clientFactory, _logger, _reportService);
+
+            _logger.LogDebug("Clearing hourly logs.");
+            await _reportService.ClearHourlyLogs();
         }
         catch (Exception excption)
         {
