@@ -1,15 +1,8 @@
-const { Faker, fa, en, base } = require("@faker-js/faker");
-
-const faker = new Faker({
-    locale: [fa, en, base],
-  });
-
-  const authentication = (req, res, next) => {
-    if (req.path === "/login" && req.method === "POST") {
+const authentication = (req, res, next) => {
+    if (req.path === "/api/v1/auth/login" && req.method === "POST") {
             res.jsonp({
-                id: faker.number.int(),
-                name: faker.person.fullName(),
-                avatar: faker.internet.avatar(),
+                id: 1,
+                name: "John Doe",
                 token: "the-token",
             });
     }

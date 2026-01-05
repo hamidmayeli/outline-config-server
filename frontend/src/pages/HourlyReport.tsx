@@ -185,7 +185,7 @@ export default function HourlyReport() {
     const visibleKeys = dataKeys.filter(key => !hiddenKeys.has(key));
 
     return (
-        <div className="px-2">
+        <div className="px-2 grid grid-cols-1 gap-10">
             <div style={{ height: "calc(100vh - 40px)" }} className="pr-5">
                 <h3 className="text-lg font-semibold mb-2">Usage by Server</h3>
                 <ResponsiveContainer>
@@ -207,7 +207,7 @@ export default function HourlyReport() {
                     </LineChart>
                 </ResponsiveContainer>
             </div>
-            <div style={{ height: "calc(100vh - 40px)" }} className="pr-5 mt-5">
+            <div style={{ height: "calc(100vh - 40px)" }} className="pr-5">
                 <h3 className="text-lg font-semibold mb-2">Total Usage</h3>
                 <ResponsiveContainer>
                     <LineChart data={totalData}>
@@ -225,7 +225,7 @@ export default function HourlyReport() {
                     </LineChart>
                 </ResponsiveContainer>
             </div>
-            <div style={{ height: "calc(100vh - 40px)" }} className="pr-5 mt-5">
+            <div style={{ height: "calc(100vh - 40px)" }} className="pr-5">
                 <h3 className="text-lg font-semibold mb-2">Week-over-Week Comparison</h3>
                 <ResponsiveContainer>
                     <LineChart data={weekComparisonData}>

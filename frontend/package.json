@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "json-server": "rest_api_faker json-server/data.cjs --middlewares json-server/middleware.cjs --routes json-server/routing.json --host 127.0.0.1 --port 5082",
+    "json-server": "rest_api_faker json-server/data.cjs --middlewares json-server/middleware.cjs --routes json-server/routing.json --host 127.0.0.1 --port 5082 -w",
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
@@ -17,7 +17,6 @@
     "recharts": "^3.6.0"
   },
   "devDependencies": {
-    "@faker-js/faker": "^10.1.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
