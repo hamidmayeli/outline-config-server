@@ -3,11 +3,14 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 # Install OpenSSL for certificate generation
 RUN apt-get update && apt-get install -y openssl
 
-# Generate and trust the developer certificate
+# Generate and export the developer certificate
 RUN dotnet dev-certs https --clean
 RUN mkdir -p /root/.aspnet/https/
 RUN dotnet dev-certs https -ep /root/.aspnet/https/aspnetapp.pfx -p password
-RUN dotnet dev-certs https --trust
+# NOTE:
+# `dotnet dev-certs https --trust` is a host/user operation and is not
+# supported reliably inside Docker build containers.
+# Trust the cert on the host machine instead (outside Docker).
 
 WORKDIR /sln
 
