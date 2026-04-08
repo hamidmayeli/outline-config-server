@@ -32,7 +32,7 @@ WORKDIR /sln
 RUN dotnet test ./API.slnx
 
 # ============== Build Client  ============== 
-FROM node:22.11.0-slim AS build-client
+FROM node:lts-slim AS build-client
 
 RUN apt-get update && apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb jq -y
 
