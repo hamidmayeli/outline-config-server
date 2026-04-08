@@ -2,6 +2,7 @@ import { baseApi } from "apis/baseApi";
 import { TextInput } from "components/textInput";
 import { startTransition, useEffect, useState } from "react";
 import { Brush, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 import { toHumanReadableBytes } from "tools/misc";
 
 export default function Report() {
@@ -123,9 +124,24 @@ export default function Report() {
 
     const formatYAxis = (tickItem: number) => toHumanReadableBytes(tickItem) ?? "";
 
-    const formatTooltip = (value: number | undefined, name: string | undefined) => {
-        if (value === undefined) return ["", name ?? ""];
-        return [toHumanReadableBytes(value), name ?? ""];
+    const formatTooltip = (value: ValueType | undefined, name: NameType | undefined) => {
+        const label = name === undefined || name === null ? "" : String(name);
+
+        if (typeof value === "number") {
+            return [toHumanReadableBytes(value), label];
+        }
+
+        if (typeof value === "string") {
+            return [value, label];
+        }
+
+        if (Array.isArray(value) && value.length > 0) {
+            const [first] = value;
+            if (typeof first === "number") return [toHumanReadableBytes(first), label];
+            return [String(first), label];
+        }
+
+        return ["", label];
     };
 
     const createALog = () => {
